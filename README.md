@@ -1,4 +1,3 @@
-cat > README.md << 'EOF'
 # 🤖 Can LLMs Replace Feature Engineering?
 
 An empirical study testing whether LLM-suggested features improve tabular ML models.
