@@ -1,0 +1,2 @@
+,Dataset,Rows,Columns,Numeric cols,Categorical cols,Missing values (total),Target type
+0,Churn,7043,19,4,15,0,Binary
