@@ -1,0 +1,8 @@
+[
+  {
+    "dataset": "housing",
+    "llm": "qwen-2.5",
+    "variant": "with_stats",
+    "error": "Failed after 3 attempts. Last error: 'NoneType' object is not subscriptable"
+  }
+]
