@@ -1,0 +1,22 @@
+.env
+.env.example
+.venv/
+venv/
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+.ipynb_checkpoints/
+data/raw/*.csv
+data/processed/*.csv
+results/llm_outputs/*.txt
+!results/llm_outputs/.gitkeep
+.DS_Store
+Thumbs.db
+EOF
+
+# Data — don't push raw CSVs to GitHub (licensing + size)
+data/raw/*.csv
+data/processed/*.csv
+!data/raw/.gitkeep
+!data/processed/.gitkeep.env
