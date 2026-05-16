@@ -1,0 +1,1340 @@
+{
+  "churn": {
+    "gpt-4o-mini__zero_shot": [
+      {
+        "name": "is_senior_partner",
+        "formula": "(SeniorCitizen == 1) & (Partner == 'Yes')",
+        "rationale": "This feature captures the interaction between being a senior citizen and having a partner, which may influence churn behavior."
+      },
+      {
+        "name": "high_monthly_charges",
+        "formula": "(MonthlyCharges > 70).astype(int)",
+        "rationale": "Higher monthly charges may correlate with higher churn rates, making this a useful flag."
+      },
+      {
+        "name": "tenure_to_charges_ratio",
+        "formula": "tenure / (MonthlyCharges + 1).clip(upper=100)",
+        "rationale": "This ratio can indicate how long customers stay relative to what they pay, potentially highlighting value perception."
+      },
+      {
+        "name": "has_internet_service",
+        "formula": "(InternetService != 'No')",
+        "rationale": "Flagging customers with internet service can help differentiate churn patterns based on service type."
+      },
+      {
+        "name": "contract_type_flag",
+        "formula": "(Contract == 'Month-to-month').astype(int)",
+        "rationale": "Month-to-month contracts often have higher churn rates, making this a significant feature."
+      },
+      {
+        "name": "total_charges_per_tenure",
+        "formula": "TotalCharges / (tenure + 1).clip(upper=100)",
+        "rationale": "This feature provides insight into spending behavior over time, which may relate to churn."
+      },
+      {
+        "name": "streaming_services_count",
+        "formula": "(StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int)",
+        "rationale": "Counting the number of streaming services used can indicate customer engagement and satisfaction."
+      }
+    ],
+    "claude-sonnet__zero_shot": [
+      {
+        "name": "avg_monthly_spend",
+        "formula": "TotalCharges / (tenure + 1)",
+        "rationale": "Captures average spending rate over customer lifetime, indicating value and potential price sensitivity."
+      },
+      {
+        "name": "high_tenure_low_charges",
+        "formula": "((tenure > 24) & (MonthlyCharges < 50)).astype(int)",
+        "rationale": "Identifies loyal customers with low bills who may be less likely to churn."
+      },
+      {
+        "name": "short_term_contract_flag",
+        "formula": "(Contract == 'Month-to-month').astype(int)",
+        "rationale": "Month-to-month contracts have higher churn risk due to lack of commitment."
+      },
+      {
+        "name": "no_online_security_with_internet",
+        "formula": "((InternetService != 'No') & (OnlineSecurity == 'No')).astype(int)",
+        "rationale": "Customers with internet but no security services may feel underserved and churn."
+      },
+      {
+        "name": "service_bundle_count",
+        "formula": "(OnlineSecurity == 'Yes').astype(int) + (OnlineBackup == 'Yes').astype(int) + (DeviceProtection == 'Yes').astype(int) + (TechSupport == 'Yes').astype(int) + (StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int)",
+        "rationale": "More bundled services create switching costs and increase customer stickiness."
+      },
+      {
+        "name": "senior_with_no_support",
+        "formula": "((SeniorCitizen == 1) & (TechSupport == 'No')).astype(int)",
+        "rationale": "Senior citizens without tech support may experience frustration leading to churn."
+      },
+      {
+        "name": "charges_to_tenure_ratio",
+        "formula": "MonthlyCharges / (tenure + 1)",
+        "rationale": "High monthly charges relative to tenure may indicate recent price increases driving churn."
+      }
+    ],
+    "gemini-flash__zero_shot": [
+      {
+        "name": "monthly_charges_per_tenure",
+        "formula": "MonthlyCharges / (tenure + 1e-9)",
+        "rationale": "Captures the monthly cost relative to the customer's tenure, indicating value for money."
+      },
+      {
+        "name": "contract_is_month_to_month",
+        "formula": "(Contract == 'Month-to-month').astype(int)",
+        "rationale": "Flags customers on month-to-month contracts, who are more likely to churn."
+      },
+      {
+        "name": "online_security_tech_support",
+        "formula": "np.where((OnlineSecurity == 'Yes') & (TechSupport == 'Yes'), 1, 0)",
+        "rationale": "Indicates if the customer has both online security and tech support, suggesting higher engagement."
+      },
+      {
+        "name": "streaming_services",
+        "formula": "np.where((StreamingTV == 'Yes') | (StreamingMovies == 'Yes'), 1, 0)",
+        "rationale": "Flags customers who use streaming services, potentially indicating higher stickiness."
+      },
+      {
+        "name": "total_charges_per_tenure",
+        "formula": "TotalCharges / (tenure + 1e-9)",
+        "rationale": "Represents the average cost per month over the customer's tenure."
+      },
+      {
+        "name": "no_internet_service",
+        "formula": "np.where(InternetService == 'No', 1, 0)",
+        "rationale": "Flags customers without internet service, who might churn for other reasons."
+      },
+      {
+        "name": "partner_and_dependents",
+        "formula": "np.where((Partner == 'Yes') & (Dependents == 'Yes'), 1, 0)",
+        "rationale": "Indicates customers with both a partner and dependents, potentially increasing stickiness."
+      }
+    ],
+    "deepseek-v3__zero_shot": [
+      {
+        "name": "tenure_to_monthly_charge_ratio",
+        "formula": "tenure / MonthlyCharges",
+        "rationale": "Captures value perception - lower ratio may indicate dissatisfaction"
+      },
+      {
+        "name": "has_dependents_and_partner",
+        "formula": "(Partner == 'Yes') & (Dependents == 'Yes')",
+        "rationale": "Family commitments may reduce churn likelihood"
+      },
+      {
+        "name": "monthly_to_total_charge_ratio",
+        "formula": "MonthlyCharges / TotalCharges.fillna(1)",
+        "rationale": "High ratio suggests new customers who may be less loyal"
+      },
+      {
+        "name": "premium_services_count",
+        "formula": "(OnlineSecurity == 'Yes') + (OnlineBackup == 'Yes') + (DeviceProtection == 'Yes') + (TechSupport == 'Yes') + (StreamingTV == 'Yes') + (StreamingMovies == 'Yes')",
+        "rationale": "More premium services may indicate higher engagement"
+      },
+      {
+        "name": "is_month_to_month_high_spender",
+        "formula": "(Contract == 'Month-to-month') & (MonthlyCharges > MonthlyCharges.median())",
+        "rationale": "High-risk segment likely to churn"
+      },
+      {
+        "name": "no_protection_services",
+        "formula": "(OnlineSecurity == 'No') & (OnlineBackup == 'No') & (DeviceProtection == 'No') & (TechSupport == 'No')",
+        "rationale": "Lack of protection services may indicate higher churn risk"
+      },
+      {
+        "name": "senior_with_long_tenure",
+        "formula": "(SeniorCitizen == 1) & (tenure > tenure.median())",
+        "rationale": "Senior long-term customers may have different churn patterns"
+      }
+    ],
+    "llama-3.3__zero_shot": [
+      {
+        "name": "high_value_customer",
+        "formula": "np.where((MonthlyCharges > 100) & (TotalCharges > 2000), 1, 0)",
+        "rationale": "Identifying high-value customers may help predict churn."
+      },
+      {
+        "name": "long_tenure_flag",
+        "formula": "np.where(tenure > 24, 1, 0)",
+        "rationale": "Long-tenure customers may have different churn patterns."
+      },
+      {
+        "name": "avg_monthly_charge",
+        "formula": "TotalCharges / tenure",
+        "rationale": "Average monthly charge may indicate customer loyalty."
+      },
+      {
+        "name": "has_additional_services",
+        "formula": "np.where((OnlineSecurity == 'Yes') | (OnlineBackup == 'Yes') | (DeviceProtection == 'Yes') | (TechSupport == 'Yes') | (StreamingTV == 'Yes') | (StreamingMovies == 'Yes'), 1, 0)",
+        "rationale": "Customers with additional services may be less likely to churn."
+      },
+      {
+        "name": "contract_type_flag",
+        "formula": "np.where(contract == 'Month-to-month', 1, 0)",
+        "rationale": "Month-to-month contracts may have higher churn rates."
+      },
+      {
+        "name": "high_usage_flag",
+        "formula": "np.where(MultipleLines == 'Yes', 1, 0)",
+        "rationale": "High-usage customers may be more likely to churn due to cost concerns."
+      },
+      {
+        "name": "billing_method_flag",
+        "formula": "np.where(PaperlessBilling == 'Yes', 1, 0)",
+        "rationale": "Customers with paperless billing may be more tech-savvy and less likely to churn."
+      }
+    ],
+    "qwen-2.5__zero_shot": [
+      {
+        "name": "total_service_features",
+        "formula": "(PhoneService == 'Yes').astype(int) + (MultipleLines == 'Yes').astype(int) + (InternetService != 'No').astype(int) + (OnlineSecurity != 'No').astype(int) + (OnlineBackup != 'No').astype(int) + (DeviceProtection != 'No').astype(int) + (TechSupport != 'No').astype(int) + (StreamingTV != 'No').astype(int) + (StreamingMovies != 'No').astype(int)",
+        "rationale": "Captures the total number of services a customer is using, which might indicate their level of engagement."
+      },
+      {
+        "name": "monthly_charges_to_tenure_ratio",
+        "formula": "MonthlyCharges / (tenure + 1)",
+        "rationale": "Represents the cost per month relative to the customer's tenure, which might influence churn likelihood."
+      },
+      {
+        "name": "total_charges_per_month",
+        "formula": "TotalCharges / (tenure + 1)",
+        "rationale": "Calculates the average monthly spending over the customer's tenure, providing insight into spending patterns."
+      },
+      {
+        "name": "is_long_term_contract",
+        "formula": "(Contract == 'Two year').astype(int)",
+        "rationale": "Flags customers with long-term contracts, who are less likely to churn."
+      },
+      {
+        "name": "is_paperless_billing",
+        "formula": "(PaperlessBilling == 'Yes').astype(int)",
+        "rationale": "Identifies customers who prefer paperless billing, which might indicate a preference for modern, streamlined services."
+      },
+      {
+        "name": "has_family",
+        "formula": "(Partner == 'Yes').astype(int) + (Dependents == 'Yes').astype(int)",
+        "rationale": "Combines partner and dependents to capture the presence of a family, which might affect churn behavior."
+      },
+      {
+        "name": "internet_service_with_security",
+        "formula": "((InternetService != 'No') & (OnlineSecurity == 'Yes')).astype(int)",
+        "rationale": "Flags customers who have both internet service and online security, indicating a higher level of service commitment."
+      }
+    ],
+    "gpt-4o-mini__with_stats": [
+      {
+        "name": "is_senior_citizen",
+        "formula": "SeniorCitizen",
+        "rationale": "Older customers may have different churn behaviors."
+      },
+      {
+        "name": "has_partners_dependents",
+        "formula": "np.where((Partner == 'Yes') & (Dependents == 'Yes'), 1, 0)",
+        "rationale": "Customers with partners and dependents may have different loyalty."
+      },
+      {
+        "name": "tenure_category",
+        "formula": "pd.cut(tenure, bins=[-1, 12, 24, 36, 48, 60, 72], labels=['0-1yr', '1-2yrs', '2-3yrs', '3-4yrs', '4-5yrs', '5+yrs'])",
+        "rationale": "Tenure can indicate customer loyalty and likelihood to churn."
+      },
+      {
+        "name": "high_monthly_charges",
+        "formula": "np.where(MonthlyCharges > 80, 1, 0)",
+        "rationale": "Higher charges may correlate with higher churn rates."
+      },
+      {
+        "name": "total_charges_log",
+        "formula": "np.log1p(TotalCharges)",
+        "rationale": "Log transformation can help normalize the distribution of total charges."
+      },
+      {
+        "name": "multiple_lines_yes",
+        "formula": "np.where(MultipleLines == 'Yes', 1, 0)",
+        "rationale": "Having multiple lines may indicate a higher commitment to the service."
+      },
+      {
+        "name": "contract_type",
+        "formula": "np.where(Contract == 'Month-to-month', 1, np.where(Contract == 'One year', 2, 3))",
+        "rationale": "Contract length can significantly influence churn likelihood."
+      }
+    ],
+    "claude-sonnet__with_stats": [
+      {
+        "name": "avg_monthly_charges",
+        "formula": "TotalCharges / (tenure + 1)",
+        "rationale": "Captures the average spending rate per month, revealing customers with high charges relative to tenure who may be more likely to churn."
+      },
+      {
+        "name": "tenure_contract_mismatch",
+        "formula": "((Contract == 'Month-to-month') & (tenure > 12)).astype(int)",
+        "rationale": "Identifies long-tenure customers still on month-to-month contracts who may be dissatisfied or at risk of leaving."
+      },
+      {
+        "name": "no_premium_services",
+        "formula": "((OnlineSecurity == 'No') & (OnlineBackup == 'No') & (TechSupport == 'No') & (DeviceProtection == 'No')).astype(int)",
+        "rationale": "Customers without any premium add-on services may have lower engagement and higher churn risk."
+      },
+      {
+        "name": "fiber_high_charges",
+        "formula": "((InternetService == 'Fiber optic') & (MonthlyCharges > 80)).astype(int)",
+        "rationale": "Fiber optic customers with high monthly charges may perceive poor value and be more likely to churn."
+      },
+      {
+        "name": "senior_no_support",
+        "formula": "((SeniorCitizen == 1) & (TechSupport == 'No')).astype(int)",
+        "rationale": "Senior citizens without tech support may struggle with services and have higher churn rates."
+      },
+      {
+        "name": "new_customer_high_charges",
+        "formula": "((tenure < 6) & (MonthlyCharges > 70)).astype(int)",
+        "rationale": "New customers with high charges may experience sticker shock and churn before becoming established."
+      },
+      {
+        "name": "single_no_dependents",
+        "formula": "((Partner == 'No') & (Dependents == 'No')).astype(int)",
+        "rationale": "Customers without family ties may have less commitment and higher mobility, increasing churn likelihood."
+      }
+    ],
+    "gemini-flash__with_stats": [
+      {
+        "name": "tenure_monthly_charges_ratio",
+        "formula": "tenure / MonthlyCharges",
+        "rationale": "Captures the value a customer is getting relative to their tenure; a high ratio might indicate a good deal, reducing churn."
+      },
+      {
+        "name": "contract_is_month_to_month",
+        "formula": "(Contract == 'Month-to-month').astype(int)",
+        "rationale": "Month-to-month contracts are likely to churn more easily."
+      },
+      {
+        "name": "total_charges_per_month",
+        "formula": "np.where(tenure > 0, TotalCharges / tenure, 0)",
+        "rationale": "Average monthly spending based on total charges and tenure, handling zero tenure to avoid division by zero."
+      },
+      {
+        "name": "has_online_services",
+        "formula": "np.where((OnlineSecurity != 'No internet service') | (OnlineBackup != 'No internet service') | (DeviceProtection != 'No internet service') | (TechSupport != 'No internet service'), 1, 0)",
+        "rationale": "Indicates whether a customer uses any online services, potentially increasing stickiness."
+      },
+      {
+        "name": "multiple_lines_or_phone_service",
+        "formula": "np.where((MultipleLines == 'Yes') | (PhoneService == 'Yes'), 1, 0)",
+        "rationale": "Customers with phone service and/or multiple lines might be less likely to churn."
+      },
+      {
+        "name": "monthly_charges_squared",
+        "formula": "MonthlyCharges * MonthlyCharges",
+        "rationale": "Captures non-linear effects of monthly charges on churn probability."
+      },
+      {
+        "name": "senior_citizen_and_partner",
+        "formula": "SeniorCitizen * (Partner == 'Yes').astype(int)",
+        "rationale": "Interaction between senior citizen status and having a partner; could indicate different needs or priorities."
+      }
+    ],
+    "deepseek-v3__with_stats": [
+      {
+        "name": "tenure_to_monthly_charge_ratio",
+        "formula": "tenure / MonthlyCharges",
+        "rationale": "Captures the relationship between tenure and monthly charges, which may indicate customer loyalty."
+      },
+      {
+        "name": "has_internet_service",
+        "formula": "(InternetService != 'No').astype(int)",
+        "rationale": "Simplifies internet service status into a binary feature, which may be more predictive."
+      },
+      {
+        "name": "monthly_to_total_charge_ratio",
+        "formula": "MonthlyCharges / TotalCharges",
+        "rationale": "Indicates the proportion of monthly charges relative to total charges, potentially reflecting customer engagement."
+      },
+      {
+        "name": "is_month_to_month_contract",
+        "formula": "(Contract == 'Month-to-month').astype(int)",
+        "rationale": "Identifies customers on month-to-month contracts, who are often more likely to churn."
+      },
+      {
+        "name": "has_multiple_services",
+        "formula": "((OnlineSecurity == 'Yes') | (OnlineBackup == 'Yes') | (DeviceProtection == 'Yes') | (TechSupport == 'Yes') | (StreamingTV == 'Yes') | (StreamingMovies == 'Yes')).astype(int)",
+        "rationale": "Flags customers with multiple services, which may reduce churn likelihood."
+      },
+      {
+        "name": "senior_citizen_with_partner",
+        "formula": "(SeniorCitizen == 1) & (Partner == 'Yes').astype(int)",
+        "rationale": "Identifies senior citizens with partners, a demographic that may have different churn behavior."
+      },
+      {
+        "name": "log_total_charges",
+        "formula": "np.log1p(TotalCharges)",
+        "rationale": "Applies a log transformation to total charges to handle skewness and improve model performance."
+      }
+    ],
+    "llama-3.3__with_stats": [
+      {
+        "name": "average_monthly_charges",
+        "formula": "TotalCharges / tenure",
+        "rationale": "This feature might help by providing a measure of the customer's average monthly spend."
+      },
+      {
+        "name": "high_value_customer",
+        "formula": "np.where(MonthlyCharges > 100, 1, 0)",
+        "rationale": "This feature might help by identifying high-value customers who may be more likely to churn."
+      },
+      {
+        "name": "long_tenure",
+        "formula": "np.where(tenure > 48, 1, 0)",
+        "rationale": "This feature might help by identifying customers with long tenure who may be more likely to stay."
+      },
+      {
+        "name": "internet_service_type",
+        "formula": "np.where(InternetService == 'Fiber optic', 2, np.where(InternetService == 'DSL', 1, 0))",
+        "rationale": "This feature might help by distinguishing between different types of internet services."
+      },
+      {
+        "name": "contract_type",
+        "formula": "np.where(Contract == 'Month-to-month', 0, np.where(Contract == 'One year', 1, 2))",
+        "rationale": "This feature might help by distinguishing between different contract types."
+      },
+      {
+        "name": "total_charges_per_tenure",
+        "formula": "TotalCharges / tenure",
+        "rationale": "This feature might help by providing a measure of the customer's total spend per month of tenure."
+      },
+      {
+        "name": "senior_citizen_with_partner",
+        "formula": "np.where((SeniorCitizen == 1) & (Partner == 'Yes'), 1, 0)",
+        "rationale": "This feature might help by identifying senior citizens with partners who may be less likely to churn."
+      }
+    ],
+    "qwen-2.5__with_stats": [
+      {
+        "name": "is_senior_citizen",
+        "formula": "SeniorCitizen.astype(int)",
+        "rationale": "Explicitly marking senior citizens might capture their unique churn behavior."
+      },
+      {
+        "name": "has_internet_service",
+        "formula": "(InternetService != 'No').astype(int)",
+        "rationale": "Identifying customers with internet service might help in understanding their churn patterns."
+      },
+      {
+        "name": "total_charges_per_tenure",
+        "formula": "TotalCharges / (tenure + 1)",
+        "rationale": "Normalizing total charges by tenure can provide insight into the average monthly spend over the customer's lifetime."
+      },
+      {
+        "name": "is_monthly_contract",
+        "formula": "(Contract == 'Month-to-month').astype(int)",
+        "rationale": "Customers on month-to-month contracts might be more likely to churn."
+      },
+      {
+        "name": "has_paperless_billing",
+        "formula": "(PaperlessBilling == 'Yes').astype(int)",
+        "rationale": "Paperless billing might be a factor in customer satisfaction and churn."
+      },
+      {
+        "name": "is_fiber_optic",
+        "formula": "(InternetService == 'Fiber optic').astype(int)",
+        "rationale": "Fiber optic customers might have different churn patterns compared to other internet services."
+      },
+      {
+        "name": "monthly_charges_to_tenure_ratio",
+        "formula": "MonthlyCharges / (tenure + 1)",
+        "rationale": "The ratio of monthly charges to tenure might capture the relative cost over time, which could influence churn."
+      }
+    ]
+  },
+  "housing": {
+    "gpt-4o-mini__zero_shot": [
+      {
+        "name": "total_bathrooms",
+        "formula": "Bsmt_Full_Bath + Bsmt_Half_Bath * 0.5 + Full_Bath + Half_Bath * 0.5",
+        "rationale": "Combining all bathroom types into a single feature can provide a clearer picture of overall bathroom availability."
+      },
+      {
+        "name": "total_sf_per_room",
+        "formula": "Gr_Liv_Area / TotRms_AbvGrd",
+        "rationale": "This ratio captures the average living space per room, which may correlate with perceived value."
+      },
+      {
+        "name": "garage_age",
+        "formula": "Yr_Sold - Garage_Yr_Blt",
+        "rationale": "The age of the garage can influence the overall house value, reflecting maintenance and condition."
+      },
+      {
+        "name": "has_basement",
+        "formula": "np.where(Bsmt_Qual.notnull(), 1, 0)",
+        "rationale": "A binary flag indicating the presence of a basement can significantly affect home prices."
+      },
+      {
+        "name": "lot_area_to_frontage_ratio",
+        "formula": "Lot_Area / Lot_Frontage.clip(lower=1)",
+        "rationale": "This ratio can indicate the shape and usability of the lot, impacting its value."
+      },
+      {
+        "name": "remodeled_age",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "The age since the last remodel can influence buyer perception and price."
+      },
+      {
+        "name": "exterior_quality_score",
+        "formula": "Exter_Qual.astype('category').cat.codes + Exter_Cond.astype('category').cat.codes",
+        "rationale": "Combining exterior quality and condition into a single score may better reflect the home's curb appeal."
+      }
+    ],
+    "claude-sonnet__zero_shot": [
+      {
+        "name": "total_sq_ft",
+        "formula": "Total_Bsmt_SF + _1st_Flr_SF + _2nd_Flr_SF",
+        "rationale": "Total living space is a primary driver of house price and combines all floor areas."
+      },
+      {
+        "name": "house_age_at_sale",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Age of the house at time of sale directly impacts depreciation and market value."
+      },
+      {
+        "name": "years_since_remod",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "Recent renovations increase home value, capturing recency of improvements matters for pricing."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "Bsmt_Full_Bath + (Bsmt_Half_Bath * 0.5) + Full_Bath + (Half_Bath * 0.5)",
+        "rationale": "Bathroom count is a key amenity feature, weighted by full versus half baths."
+      },
+      {
+        "name": "quality_area_interaction",
+        "formula": "Overall_Qual * Gr_Liv_Area",
+        "rationale": "High quality large homes command premium prices beyond additive effects of size and quality."
+      },
+      {
+        "name": "has_garage",
+        "formula": "(Garage_Area > 0).astype(int)",
+        "rationale": "Presence of a garage is a binary amenity that significantly affects home desirability and price."
+      },
+      {
+        "name": "lot_area_per_room",
+        "formula": "Lot_Area / (TotRms_AbvGrd + 1)",
+        "rationale": "Ratio of land to rooms indicates spaciousness and lot utilization efficiency affecting value."
+      }
+    ],
+    "gemini-flash__zero_shot": [
+      {
+        "name": "total_bathrooms",
+        "formula": "Bsmt_Full_Bath + (Bsmt_Half_Bath * 0.5) + Full_Bath + (Half_Bath * 0.5)",
+        "rationale": "Combines all bathroom counts into a single, more informative feature."
+      },
+      {
+        "name": "age_since_remodel",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "Captures the age of the house since it was last remodeled, which can impact sale price."
+      },
+      {
+        "name": "lot_frontage_area_ratio",
+        "formula": "Lot_Frontage / Lot_Area",
+        "rationale": "Represents the proportion of frontage relative to the lot size, potentially indicating desirability."
+      },
+      {
+        "name": "has_pool",
+        "formula": "np.where(Pool_Area > 0, 1, 0)",
+        "rationale": "A binary flag indicating the presence of a pool, which is a valuable amenity."
+      },
+      {
+        "name": "quality_condition_interaction",
+        "formula": "Overall_Qual * Overall_Cond",
+        "rationale": "Captures the interaction between overall quality and condition, which can have a non-linear effect on price."
+      },
+      {
+        "name": "garage_age",
+        "formula": "np.where(Garage_Yr_Blt > 0, Yr_Sold - Garage_Yr_Blt, 0)",
+        "rationale": "Represents the age of the garage, which can impact sale price."
+      },
+      {
+        "name": "bsmt_finished_ratio",
+        "formula": "(BsmtFin_SF_1 + BsmtFin_SF_2) / (Total_Bsmt_SF + 1e-9)",
+        "rationale": "The ratio of finished basement square footage to total basement square footage, indicating basement quality."
+      }
+    ],
+    "deepseek-v3__zero_shot": [
+      {
+        "name": "total_livability_score",
+        "formula": "Overall_Qual * Overall_Cond * Gr_Liv_Area",
+        "rationale": "Combines quality, condition, and living area for a holistic livability measure"
+      },
+      {
+        "name": "age_at_sale",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Captures the age of the property at time of sale"
+      },
+      {
+        "name": "bathroom_ratio",
+        "formula": "(Full_Bath + Half_Bath) / Bedroom_AbvGr",
+        "rationale": "Measures bathroom availability relative to bedrooms"
+      },
+      {
+        "name": "has_pool_flag",
+        "formula": "np.where(Pool_Area > 0, 1, 0)",
+        "rationale": "Indicates presence of a pool as a luxury feature"
+      },
+      {
+        "name": "lot_coverage_ratio",
+        "formula": "Total_Bsmt_SF / Lot_Area",
+        "rationale": "Shows how much of the lot is covered by the building"
+      },
+      {
+        "name": "garage_score",
+        "formula": "Garage_Cars * Garage_Area * np.where(Garage_Finish == 'Fin', 1, 0.5)",
+        "rationale": "Combines garage size, capacity, and finish quality"
+      },
+      {
+        "name": "kitchen_quality_flag",
+        "formula": "np.where(Kitchen_Qual == 'Ex', 1, 0)",
+        "rationale": "Flags excellent kitchen quality as a premium feature"
+      }
+    ],
+    "llama-3.3__zero_shot": [
+      {
+        "name": "age_of_house",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Captures the age of the house at the time of sale, which may impact its price."
+      },
+      {
+        "name": "basement_to_total_area_ratio",
+        "formula": "Total_Bsmt_SF / Gr_Liv_Area",
+        "rationale": "Represents the proportion of basement area to total living area, which may affect the house's value."
+      },
+      {
+        "name": "has_pool",
+        "formula": "np.where(Pool_Area > 0, 1, 0)",
+        "rationale": "Indicates whether the house has a pool, which can be a desirable feature."
+      },
+      {
+        "name": "garage_to_house_size_ratio",
+        "formula": "Garage_Area / Gr_Liv_Area",
+        "rationale": "Captures the relative size of the garage compared to the house, which may impact its price."
+      },
+      {
+        "name": "high_quality_exterior",
+        "formula": "np.where(Exter_Qual == 'Ex', 1, 0)",
+        "rationale": "Flags houses with high-quality exterior, which may increase their value."
+      },
+      {
+        "name": "total_bathroom_count",
+        "formula": "Full_Bath + Bsmt_Full_Bath + Half_Bath + Bsmt_Half_Bath",
+        "rationale": "Represents the total number of bathrooms in the house, which is an important feature for buyers."
+      },
+      {
+        "name": "lot_size_to_area_ratio",
+        "formula": "Lot_Area / Lot_Frontage",
+        "rationale": "Captures the depth of the lot compared to its frontage, which may affect the house's value."
+      }
+    ],
+    "qwen-2.5__zero_shot": [
+      {
+        "name": "total_bathrooms",
+        "formula": "Bsmt_Full_Bath + Bsmt_Half_Bath + Full_Bath + Half_Bath",
+        "rationale": "Total number of bathrooms can capture the overall bathroom capacity of the house."
+      },
+      {
+        "name": "total_finished_basement_area",
+        "formula": "BsmtFin_SF_1 + BsmtFin_SF_2",
+        "rationale": "Sum of finished basement areas can provide a better measure of usable basement space."
+      },
+      {
+        "name": "total_living_area",
+        "formula": "Gr_Liv_Area + Total_Bsmt_SF",
+        "rationale": "Combining above-ground and basement living areas gives a comprehensive measure of living space."
+      },
+      {
+        "name": "age_at_sale",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "The age of the house at the time of sale can influence its value."
+      },
+      {
+        "name": "remodel_age",
+        "formula": "np.where(Year_Remod_Add > Year_Built, Yr_Sold - Year_Remod_Add, 0)",
+        "rationale": "The age of the last remodel at the time of sale can affect the perceived value of the house."
+      },
+      {
+        "name": "total_porch_area",
+        "formula": "Open_Porch_SF + Enclosed_Porch + _3Ssn_Porch + Screen_Porch",
+        "rationale": "Total porch area can capture the extent of outdoor living space, which may be valuable to buyers."
+      },
+      {
+        "name": "garage_age",
+        "formula": "np.where(Garage_Yr_Blt > 0, Yr_Sold - Garage_Yr_Blt, 0)",
+        "rationale": "The age of the garage at the time of sale can impact its condition and value."
+      }
+    ],
+    "gpt-4o-mini__with_stats": [
+      {
+        "name": "lot_frontage_ratio",
+        "formula": "Lot_Frontage / Lot_Area",
+        "rationale": "This ratio can indicate how much street frontage a lot has relative to its size, which may correlate with value."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "Bsmt_Full_Bath + Bsmt_Half_Bath + Full_Bath + Half_Bath",
+        "rationale": "Total bathrooms can be a strong predictor of house value, as more bathrooms generally increase desirability."
+      },
+      {
+        "name": "year_since_remodel",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "The age since the last remodel can affect the home's appeal and price."
+      },
+      {
+        "name": "garage_area_per_car",
+        "formula": "Garage_Area / Garage_Cars.fillna(1)",
+        "rationale": "This feature assesses the space available per car in the garage, which may influence buyer preferences."
+      },
+      {
+        "name": "overall_quality_cond",
+        "formula": "Overall_Qual * Overall_Cond",
+        "rationale": "Combining overall quality and condition can provide a more comprehensive measure of a home's desirability."
+      },
+      {
+        "name": "living_area_ratio",
+        "formula": "Gr_Liv_Area / Lot_Area",
+        "rationale": "This ratio indicates how much of the lot is utilized for living space, which can correlate with value."
+      },
+      {
+        "name": "total_rooms_ratio",
+        "formula": "TotRms_AbvGrd / Gr_Liv_Area",
+        "rationale": "This ratio can indicate the density of rooms relative to living space, which may affect buyer perceptions."
+      }
+    ],
+    "claude-sonnet__with_stats": [
+      {
+        "name": "total_sf",
+        "formula": "Total_Bsmt_SF.fillna(0) + _1st_Flr_SF + _2nd_Flr_SF",
+        "rationale": "Total living space is a strong predictor of house price across all floors."
+      },
+      {
+        "name": "house_age",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Age of house at sale time captures depreciation effects on price."
+      },
+      {
+        "name": "years_since_remod",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "Recent renovations typically increase sale price significantly."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "Bsmt_Full_Bath.fillna(0) + 0.5 * Bsmt_Half_Bath.fillna(0) + Full_Bath + 0.5 * Half_Bath",
+        "rationale": "Total bathroom count is a key amenity that strongly correlates with price."
+      },
+      {
+        "name": "quality_condition_score",
+        "formula": "Overall_Qual * Overall_Cond",
+        "rationale": "Interaction between quality and condition captures homes that are both well-built and well-maintained."
+      },
+      {
+        "name": "price_per_sqft_neighborhood",
+        "formula": "np.where(Neighborhood == 'NAmes', 1, np.where(Neighborhood == 'CollgCr', 2, np.where(Neighborhood == 'OldTown', 0, 1)))",
+        "rationale": "Neighborhood is a strong price predictor and encoding top neighborhoods captures location premium."
+      },
+      {
+        "name": "has_garage_and_porch",
+        "formula": "(Garage_Area.fillna(0) > 0).astype(int) + (Wood_Deck_SF > 0).astype(int) + (Open_Porch_SF > 0).astype(int)",
+        "rationale": "Outdoor amenities combined indicate desirable property features that command higher prices."
+      }
+    ],
+    "gemini-flash__with_stats": [
+      {
+        "name": "total_sf",
+        "formula": "_1st_Flr_SF + _2nd_Flr_SF + Total_Bsmt_SF",
+        "rationale": "Combines all square footage measurements into a single, comprehensive feature."
+      },
+      {
+        "name": "age_at_sale",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Calculates the age of the house at the time of sale, which is likely to impact price."
+      },
+      {
+        "name": "remod_age",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "Calculates the age of the last remodel, which can indicate how up-to-date the house is."
+      },
+      {
+        "name": "lot_frontage_area_ratio",
+        "formula": "Lot_Frontage / Lot_Area",
+        "rationale": "Captures the relationship between lot frontage and area, potentially indicating lot shape and desirability."
+      },
+      {
+        "name": "porch_area",
+        "formula": "Wood_Deck_SF + Open_Porch_SF + Enclosed_Porch + _3Ssn_Porch + Screen_Porch",
+        "rationale": "Combines all porch areas into a single feature representing outdoor living space."
+      },
+      {
+        "name": "has_garage",
+        "formula": "np.where(Garage_Area > 0, 1, 0)",
+        "rationale": "Indicates whether the property has a garage or not, which is a significant factor."
+      },
+      {
+        "name": "quality_condition_interaction",
+        "formula": "Overall_Qual * Overall_Cond",
+        "rationale": "Captures the combined effect of overall quality and condition on the sale price."
+      }
+    ],
+    "deepseek-v3__with_stats": [
+      {
+        "name": "total_living_area",
+        "formula": "Gr_Liv_Area + BsmtFin_SF_1 + BsmtFin_SF_2",
+        "rationale": "Combines above-ground and basement living areas for a comprehensive size metric."
+      },
+      {
+        "name": "garage_per_car_area",
+        "formula": "Garage_Area / Garage_Cars",
+        "rationale": "Measures average garage space per car, indicating garage spaciousness."
+      },
+      {
+        "name": "age_at_sale",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Captures the age of the house at the time of sale, which affects value."
+      },
+      {
+        "name": "remodel_age",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "Indicates how recently the house was remodeled, influencing price."
+      },
+      {
+        "name": "lot_frontage_to_area_ratio",
+        "formula": "Lot_Frontage / Lot_Area",
+        "rationale": "Measures the proportion of frontage relative to total lot size."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "Full_Bath + Half_Bath + Bsmt_Full_Bath + Bsmt_Half_Bath",
+        "rationale": "Sums all bathrooms, including basement, for a complete bathroom count."
+      },
+      {
+        "name": "quality_condition_index",
+        "formula": "Overall_Qual * Overall_Cond",
+        "rationale": "Multiplies quality and condition ratings for a combined quality metric."
+      }
+    ],
+    "llama-3.3__with_stats": [
+      {
+        "name": "lot_area_to_frontage_ratio",
+        "formula": "Lot_Area / Lot_Frontage",
+        "rationale": "This feature might help capture the shape and size of the lot."
+      },
+      {
+        "name": "age_of_home",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "This feature might help account for the age and potential depreciation of the home."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "Full_Bath + Half_Bath + Bsmt_Full_Bath + Bsmt_Half_Bath",
+        "rationale": "This feature might help capture the total number of bathrooms in the home."
+      },
+      {
+        "name": "total_living_area",
+        "formula": "Gr_Liv_Area + Total_Bsmt_SF",
+        "rationale": "This feature might help capture the total living area of the home."
+      },
+      {
+        "name": "garage_size_per_car",
+        "formula": "np.where(Garage_Cars > 0, Garage_Area / Garage_Cars, 0)",
+        "rationale": "This feature might help capture the size of the garage relative to the number of cars it can hold."
+      },
+      {
+        "name": "porch_area_per_house",
+        "formula": "np.where(Gr_Liv_Area > 0, (Wood_Deck_SF + Open_Porch_SF + Enclosed_Porch + _3Ssn_Porch + Screen_Porch) / Gr_Liv_Area, 0)",
+        "rationale": "This feature might help capture the amount of outdoor living space relative to the size of the home."
+      },
+      {
+        "name": "log_lot_area",
+        "formula": "np.log1p(Lot_Area)",
+        "rationale": "This feature might help capture the non-linear relationship between lot area and sale price."
+      }
+    ],
+    "qwen-2.5__with_stats": [
+      {
+        "name": "total_bathrooms",
+        "formula": "Bsmt_Full_Bath + Bsmt_Half_Bath + Full_Bath + Half_Bath",
+        "rationale": "Combining all bathroom counts provides a comprehensive measure of total bathroom facilities."
+      },
+      {
+        "name": "total_living_area",
+        "formula": "Gr_Liv_Area + Total_Bsmt_SF",
+        "rationale": "Summing ground living area and basement area gives a complete picture of the total living space."
+      },
+      {
+        "name": "age_of_house",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "The age of the house at the time of sale can influence its price."
+      },
+      {
+        "name": "remodel_age",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "The age since the last remodel can affect the perceived value of the house."
+      },
+      {
+        "name": "total_porch_area",
+        "formula": "Open_Porch_SF + Enclosed_Porch + _3Ssn_Porch + Screen_Porch",
+        "rationale": "Summing all porch areas provides a measure of outdoor living space."
+      },
+      {
+        "name": "garage_age",
+        "formula": "Yr_Sold - Garage_Yr_Blt.fillna(Year_Built)",
+        "rationale": "The age of the garage, using the year built if garage year is missing, can impact the house's value."
+      },
+      {
+        "name": "total_finished_basement_area",
+        "formula": "BsmtFin_SF_1 + BsmtFin_SF_2",
+        "rationale": "Summing the finished basement areas gives a measure of usable basement space."
+      }
+    ]
+  },
+  "bank": {
+    "gpt-4o-mini__zero_shot": [
+      {
+        "name": "age_campaign_interaction",
+        "formula": "age * campaign",
+        "rationale": "This feature captures the interaction between age and the number of contacts, which may influence subscription likelihood."
+      },
+      {
+        "name": "previous_campaign_ratio",
+        "formula": "previous / (campaign + 1)",
+        "rationale": "This ratio indicates the effectiveness of past campaigns relative to the current one."
+      },
+      {
+        "name": "is_default_flag",
+        "formula": "default == 'yes'",
+        "rationale": "Flagging clients with credit default may help identify riskier clients less likely to subscribe."
+      },
+      {
+        "name": "contact_month_numeric",
+        "formula": "contact.map({'cellular': 1, 'telephone': 2})",
+        "rationale": "Converting contact type to numeric may help the model understand the importance of contact method."
+      },
+      {
+        "name": "housing_loan_interaction",
+        "formula": "housing.astype(int) * loan.astype(int)",
+        "rationale": "This interaction captures clients with both housing and personal loans, potentially indicating financial strain."
+      },
+      {
+        "name": "pdays_previous_outcome",
+        "formula": "np.where(pdays > 0, previous, 0)",
+        "rationale": "This feature indicates the number of previous contacts only for clients who were previously contacted."
+      },
+      {
+        "name": "employment_rate_ratio",
+        "formula": "emp.var.rate / nr.employed",
+        "rationale": "This ratio may capture the relationship between employment variation and overall employment levels."
+      }
+    ],
+    "claude-sonnet__zero_shot": [
+      {
+        "name": "contact_intensity",
+        "formula": "campaign * previous",
+        "rationale": "Captures total marketing exposure combining current and past campaign contacts which may indicate client engagement level."
+      },
+      {
+        "name": "days_since_previous_contact",
+        "formula": "np.where(pdays == 999, 0, pdays)",
+        "rationale": "Converts the special value 999 (never contacted) to 0 to create a more meaningful recency metric for modeling."
+      },
+      {
+        "name": "previous_success_flag",
+        "formula": "(poutcome == 'success').astype(int)",
+        "rationale": "Binary indicator of previous campaign success strongly predicts future subscription likelihood based on past behavior."
+      },
+      {
+        "name": "economic_confidence_ratio",
+        "formula": "cons.conf.idx / euribor3m.clip(lower=0.01)",
+        "rationale": "Combines consumer confidence with interest rates to capture overall economic sentiment affecting investment decisions."
+      },
+      {
+        "name": "high_risk_profile",
+        "formula": "((default == 'yes') | (loan == 'yes')).astype(int)",
+        "rationale": "Flags clients with existing financial obligations who may be less likely to commit to additional financial products."
+      },
+      {
+        "name": "campaign_efficiency",
+        "formula": "previous / campaign.clip(lower=1)",
+        "rationale": "Ratio of historical contacts to current campaign intensity reveals how much effort is needed per client."
+      },
+      {
+        "name": "employment_stability_index",
+        "formula": "nr.employed * (1 + emp.var.rate)",
+        "rationale": "Combines employment numbers with variation rate to capture labor market stability affecting financial decision confidence."
+      }
+    ],
+    "gemini-flash__zero_shot": [
+      {
+        "name": "age_x_campaign",
+        "formula": "age * campaign",
+        "rationale": "Captures the interaction between age and the number of contacts during the campaign, potentially highlighting the effectiveness of the campaign for different age groups."
+      },
+      {
+        "name": "housing_loan_flag",
+        "formula": "np.where((housing == 'yes') & (loan == 'yes'), 1, 0)",
+        "rationale": "Indicates whether the client has both housing and personal loans, which might reflect a higher risk profile."
+      },
+      {
+        "name": "euribor3m_x_emp_var_rate",
+        "formula": "euribor3m * emp.var.rate",
+        "rationale": "Combines two economic indicators to capture a more nuanced view of the economic climate's impact on subscription likelihood."
+      },
+      {
+        "name": "pdays_success_ratio",
+        "formula": "np.where(pdays > 0, previous / (pdays + 1), 0)",
+        "rationale": "Calculates the ratio of previous contacts to the time since the last contact, indicating the effectiveness of past campaigns."
+      },
+      {
+        "name": "consumer_confidence_price_diff",
+        "formula": "cons.conf.idx - cons.price.idx",
+        "rationale": "Captures the difference between consumer confidence and price index, reflecting the overall economic sentiment."
+      },
+      {
+        "name": "contact_duration_flag",
+        "formula": "np.where(contact == 'cellular', 1, 0)",
+        "rationale": "Flags whether the contact was made via cellular, which might be more effective than other methods."
+      },
+      {
+        "name": "unemployed_ratio",
+        "formula": "(nr.employed - (nr.employed * (1 - emp.var.rate))).clip(0,100)",
+        "rationale": "Approximates the number of unemployed by using the emp.var.rate and nr.employed columns."
+      }
+    ],
+    "deepseek-v3__zero_shot": [
+      {
+        "name": "contact_frequency_score",
+        "formula": "campaign * previous",
+        "rationale": "Combines campaign and previous contacts to capture overall contact intensity."
+      },
+      {
+        "name": "employment_stability_index",
+        "formula": "emp.var.rate * nr.employed",
+        "rationale": "Multiplies employment variation rate by number of employees to gauge job market stability."
+      },
+      {
+        "name": "loan_default_flag",
+        "formula": "(default == 'yes').astype(int) * (loan == 'yes').astype(int)",
+        "rationale": "Flags clients with both a loan and a default, indicating higher financial risk."
+      },
+      {
+        "name": "economic_pressure_index",
+        "formula": "cons.price.idx / cons.conf.idx",
+        "rationale": "Ratio of consumer price index to consumer confidence index to measure economic pressure."
+      },
+      {
+        "name": "previous_success_ratio",
+        "formula": "previous / (campaign + 1)",
+        "rationale": "Ratio of previous successful contacts to total campaign contacts, indicating past success rate."
+      },
+      {
+        "name": "euribor_employment_interaction",
+        "formula": "euribor3m * nr.employed",
+        "rationale": "Interaction between Euribor rate and number of employees to capture macroeconomic influence."
+      },
+      {
+        "name": "marital_job_interaction",
+        "formula": "(marital == 'married').astype(int) * (job == 'blue-collar').astype(int)",
+        "rationale": "Interaction between marital status and job type to identify specific demographic segments."
+      }
+    ],
+    "llama-3.3__zero_shot": [
+      {
+        "name": "age_group",
+        "formula": "np.where(age < 25, 'young', np.where(age < 50, 'middle', 'old'))",
+        "rationale": "Capturing age groups might help identify life stages more prone to term deposit subscription"
+      },
+      {
+        "name": "job_stability",
+        "formula": "np.where(job == 'management', 1, np.where(job == 'technician', 1, 0))",
+        "rationale": "Certain jobs might indicate higher stability and ability to subscribe to term deposits"
+      },
+      {
+        "name": "education_level",
+        "formula": "np.where(education == 'tertiary', 2, np.where(education == 'secondary', 1, 0))",
+        "rationale": "Higher education levels might correlate with better financial understanding and term deposit subscription"
+      },
+      {
+        "name": "credit_risk",
+        "formula": "np.where(default == 'yes', 1, 0) + np.where(loan == 'yes', 1, 0)",
+        "rationale": "Combining credit risk indicators might help identify clients less likely to subscribe to term deposits"
+      },
+      {
+        "name": "employment_ratio",
+        "formula": "nr.employed / cons.conf.idx",
+        "rationale": "The ratio of employed individuals to consumer confidence index might capture economic conditions influencing term deposit subscription"
+      },
+      {
+        "name": "previous_campaigns",
+        "formula": "np.where(previous > 0, 1, 0)",
+        "rationale": "Previous campaign participation might indicate a client's receptiveness to term deposit offers"
+      },
+      {
+        "name": "economic_stress",
+        "formula": "euribor3m + emp.var.rate",
+        "rationale": "Combining economic stress indicators might help identify clients more likely to seek term deposits as a safe investment"
+      }
+    ],
+    "qwen-2.5__zero_shot": [
+      {
+        "name": "age_education_ratio",
+        "formula": "age / (education.map({'unknown': 0, 'primary': 1, 'secondary': 2, 'tertiary': 3}).fillna(0) + 1)",
+        "rationale": "Captures the relationship between age and education level, which might influence financial decisions."
+      },
+      {
+        "name": "contact_frequency",
+        "formula": "campaign / (pdays + 1)",
+        "rationale": "Measures the frequency of contact attempts, which could indicate the client's responsiveness."
+      },
+      {
+        "name": "previous_contact_success",
+        "formula": "np.where(poutcome == 'success', 1, 0)",
+        "rationale": "Flags whether a previous marketing campaign was successful, which might influence the current campaign's success."
+      },
+      {
+        "name": "employment_stability",
+        "formula": "np.where(job == 'unemployed', 0, 1) * np.where(marital == 'married', 1, 0)",
+        "rationale": "Combines employment status and marital status to capture stability, which might affect the likelihood of subscribing."
+      },
+      {
+        "name": "economic_confidence",
+        "formula": "cons.conf.idx / (euribor3m + 1)",
+        "rationale": "Captures the ratio of consumer confidence to interest rates, reflecting economic conditions that might influence decisions."
+      },
+      {
+        "name": "loan_housing_flag",
+        "formula": "np.where((housing == 'yes') & (loan == 'yes'), 1, 0)",
+        "rationale": "Flags clients with both housing and personal loans, indicating higher financial obligations."
+      },
+      {
+        "name": "campaign_intensity",
+        "formula": "campaign * (1 + (previous > 0).astype(int))",
+        "rationale": "Enhances the campaign count by considering previous contact attempts, capturing the intensity of marketing efforts."
+      }
+    ],
+    "gpt-4o-mini__with_stats": [
+      {
+        "name": "age_binned",
+        "formula": "pd.cut(age, bins=[17, 30, 40, 50, 60, 70, 100], labels=[1, 2, 3, 4, 5, 6])",
+        "rationale": "Binning age can capture non-linear effects of age on subscription likelihood."
+      },
+      {
+        "name": "job_marital_combination",
+        "formula": "job + '_' + marital",
+        "rationale": "Combining job and marital status may reveal unique patterns in subscription behavior."
+      },
+      {
+        "name": "contact_type",
+        "formula": "contact == 'cellular'",
+        "rationale": "Identifying if the contact type is cellular may correlate with higher subscription rates."
+      },
+      {
+        "name": "campaign_success_rate",
+        "formula": "previous / (campaign + 1)",
+        "rationale": "This feature captures the relationship between previous contacts and the current campaign's intensity."
+      },
+      {
+        "name": "pdays_known",
+        "formula": "np.where(pdays < 999, 1, 0)",
+        "rationale": "Indicating whether a client was previously contacted may influence their likelihood to subscribe."
+      },
+      {
+        "name": "high_education",
+        "formula": "education.isin(['university.degree', 'high.school']).astype(int)",
+        "rationale": "Higher education levels may correlate with a greater likelihood of subscribing."
+      },
+      {
+        "name": "economic_stability",
+        "formula": "emp.var.rate * cons.price.idx",
+        "rationale": "Combining economic indicators may provide insights into the financial context affecting subscription decisions."
+      }
+    ],
+    "claude-sonnet__with_stats": [
+      {
+        "name": "contact_intensity",
+        "formula": "campaign * previous",
+        "rationale": "Interaction between current campaign contacts and previous campaign history captures total marketing exposure intensity."
+      },
+      {
+        "name": "recently_contacted",
+        "formula": "(pdays < 999).astype(int)",
+        "rationale": "Binary indicator separating clients contacted in previous campaign from never-contacted (pdays=999 appears to be a sentinel value)."
+      },
+      {
+        "name": "economic_confidence_ratio",
+        "formula": "cons.conf.idx / emp.var.rate.clip(-10, 10).replace(0, 0.01)",
+        "rationale": "Ratio of consumer confidence to employment variation captures overall economic sentiment affecting investment decisions."
+      },
+      {
+        "name": "age_employment_interaction",
+        "formula": "age * nr.employed / 100000",
+        "rationale": "Combines client life stage with macroeconomic employment levels to capture demographic-economic context for financial decisions."
+      },
+      {
+        "name": "previous_success",
+        "formula": "((poutcome == 'success') & (previous > 0)).astype(int)",
+        "rationale": "Identifies clients who previously subscribed, likely the strongest predictor of future subscription behavior."
+      },
+      {
+        "name": "high_campaign_pressure",
+        "formula": "(campaign >= 3).astype(int)",
+        "rationale": "Flags clients contacted 3+ times in current campaign, as excessive contact may indicate resistance or reduce conversion likelihood."
+      },
+      {
+        "name": "financial_stability_score",
+        "formula": "((default == 'no').astype(int) + (housing == 'no').astype(int) + (loan == 'no').astype(int)) / 3",
+        "rationale": "Composite score of financial obligations indicating disposable income availability for term deposit investment."
+      }
+    ],
+    "gemini-flash__with_stats": [
+      {
+        "name": "age_squared",
+        "formula": "age * age",
+        "rationale": "Captures non-linear relationship between age and subscription."
+      },
+      {
+        "name": "euribor3m_squared",
+        "formula": "euribor3m * euribor3m",
+        "rationale": "Captures non-linear relationship between euribor3m and subscription."
+      },
+      {
+        "name": "campaign_success_ratio",
+        "formula": "np.where(previous > 0, campaign / (previous + 1), campaign)",
+        "rationale": "Captures the ratio of campaign contacts to previous contacts, indicating campaign efficiency."
+      },
+      {
+        "name": "employment_rate_index",
+        "formula": "emp.var.rate * cons.price.idx",
+        "rationale": "Combines employment variation rate and consumer price index to capture economic conditions."
+      },
+      {
+        "name": "contact_duration_score",
+        "formula": "np.where(contact == 'cellular', 1, 0) + np.where(day_of_week.isin(['mon', 'fri']), -0.5, 0)",
+        "rationale": "Combines contact type and day of week to create a simple contact duration score."
+      },
+      {
+        "name": "pdays_not_contacted",
+        "formula": "np.where(pdays == 999, 1, 0)",
+        "rationale": "Flags customers who were never contacted before the current campaign."
+      },
+      {
+        "name": "loan_housing_interaction",
+        "formula": "np.where((loan == 'yes') & (housing == 'yes'), 1, 0)",
+        "rationale": "Captures the interaction effect of having both a loan and housing."
+      }
+    ],
+    "deepseek-v3__with_stats": [
+      {
+        "name": "age_binned",
+        "formula": "pd.cut(age, bins=[0, 30, 50, 70, 100], labels=['young', 'mid', 'senior', 'elderly'])",
+        "rationale": "Age groups may have different subscription patterns than raw age values."
+      },
+      {
+        "name": "contacted_many_times",
+        "formula": "(campaign > 3).astype(int)",
+        "rationale": "Clients contacted many times may be more likely to subscribe due to persistence."
+      },
+      {
+        "name": "economic_stress_index",
+        "formula": "cons.conf.idx / cons.price.idx",
+        "rationale": "Combines consumer confidence and price index to measure economic pressure."
+      },
+      {
+        "name": "previous_success_ratio",
+        "formula": "previous / (campaign + 1)",
+        "rationale": "Measures proportion of successful contacts relative to total attempts."
+      },
+      {
+        "name": "recent_contact",
+        "formula": "(pdays < 30).astype(int)",
+        "rationale": "Clients contacted recently may be more likely to respond positively."
+      },
+      {
+        "name": "high_education",
+        "formula": "(education == 'university.degree').astype(int)",
+        "rationale": "University-educated clients may have different financial behaviors."
+      },
+      {
+        "name": "employment_stability",
+        "formula": "emp.var.rate * nr.employed",
+        "rationale": "Combines employment variation and size to measure job market stability."
+      }
+    ],
+    "llama-3.3__with_stats": [
+      {
+        "name": "age_group",
+        "formula": "np.where(age < 30, 0, np.where(age < 60, 1, 2))",
+        "rationale": "Age grouping might help capture non-linear relationships with the target variable."
+      },
+      {
+        "name": "education_level",
+        "formula": "np.where(education == 'university.degree', 2, np.where(education == 'high.school', 1, 0))",
+        "rationale": "Education level might be a strong predictor of term deposit subscription."
+      },
+      {
+        "name": "employment_status",
+        "formula": "np.where(job == 'admin.', 1, np.where(job == 'blue-collar', 2, 3))",
+        "rationale": "Job type might influence financial stability and term deposit subscription."
+      },
+      {
+        "name": "credit_risk",
+        "formula": "np.where(default == 'yes', 1, np.where(default == 'unknown', 0.5, 0))",
+        "rationale": "Credit risk might affect the likelihood of term deposit subscription."
+      },
+      {
+        "name": "campaign_intensity",
+        "formula": "campaign + previous",
+        "rationale": "Combining campaign and previous features might capture the overall marketing effort."
+      },
+      {
+        "name": "economic_stability",
+        "formula": "cons.price.idx + cons.conf.idx",
+        "rationale": "Economic stability indicators might influence term deposit subscription decisions."
+      },
+      {
+        "name": "employment_rate",
+        "formula": "np.log1p(nr.employed)",
+        "rationale": "Employment rate might have a non-linear relationship with term deposit subscription."
+      }
+    ],
+    "qwen-2.5__with_stats": [
+      {
+        "name": "age_group",
+        "formula": "pd.cut(age, bins=[17, 30, 50, 70, 98], labels=[1, 2, 3, 4])",
+        "rationale": "Grouping age into bins can capture different life stages that might influence subscription behavior."
+      },
+      {
+        "name": "education_level",
+        "formula": "education.replace({'illiterate': 1, 'basic.4y': 2, 'basic.6y': 3, 'basic.9y': 4, 'high.school': 5, 'professional.course': 6, 'university.degree': 7})",
+        "rationale": "Mapping education levels to a numerical scale can help capture the impact of education on subscription likelihood."
+      },
+      {
+        "name": "contact_frequency",
+        "formula": "campaign / (1 + previous)",
+        "rationale": "This ratio can indicate the effectiveness of each contact, normalizing by the number of previous contacts."
+      },
+      {
+        "name": "recent_contact",
+        "formula": "np.where(pdays == 999, 0, 1)",
+        "rationale": "A binary feature indicating whether the client was recently contacted can capture the immediacy of the marketing effort."
+      },
+      {
+        "name": "economic_stability",
+        "formula": "emp.var.rate * cons.price.idx / (1 + abs(cons.conf.idx))",
+        "rationale": "Combining economic indicators can provide a more comprehensive view of the client's economic context."
+      },
+      {
+        "name": "loan_status",
+        "formula": "np.where(loan == 'unknown', 0, np.where(loan == 'yes', 1, -1))",
+        "rationale": "Mapping loan status to a numerical scale can help capture the impact of financial obligations on subscription likelihood."
+      },
+      {
+        "name": "poutcome_success",
+        "formula": "np.where(poutcome == 'success', 1, 0)",
+        "rationale": "A binary feature indicating whether a previous marketing campaign was successful can capture the client's past engagement."
+      }
+    ]
+  }
+}

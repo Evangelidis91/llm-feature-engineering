@@ -42,19 +42,35 @@ def load_churn(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
 # =====================================================================
 # Ames Housing (Regression)
 # =====================================================================
+import re
+import pandas as pd
+
+
 def load_housing(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
     """Load and lightly clean the Ames Housing dataset.
 
-    Returns:
-        X: features DataFrame
-        y: SalePrice (continuous target)
+    Column names are sanitized (spaces → underscores) so they are
+    valid Python identifiers. Without this, LLM formulas using
+    backtick syntax like `Gr Liv Area` fail in our eval-based
+    feature engineer.
     """
     df = pd.read_csv(HOUSING_FILE)
 
-    # Drop ID columns if present (varies by dataset version)
+    # Drop ID columns if present
     for col in ["Order", "PID", "Id"]:
         if col in df.columns:
             df = df.drop(columns=[col])
+
+    # 🔧 Sanitize column names so LLM formulas can reference them safely
+    def clean(name: str) -> str:
+        name = re.sub(r"[^\w]", "_", name)  # non-word chars → _
+        name = re.sub(r"_+", "_", name)  # collapse multiple _
+        name = name.strip("_")
+        if name and name[0].isdigit():
+            name = "_" + name  # prepend _ if starts with digit
+        return name
+
+    df.columns = [clean(c) for c in df.columns]
 
     y = df["SalePrice"]
     X = df.drop(columns=["SalePrice"])
@@ -65,11 +81,11 @@ def load_housing(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
     if high_missing:
         X = X.drop(columns=high_missing)
         if verbose:
-            print(f"   Dropped {len(high_missing)} cols with >40% missing")
+            print(f"    Dropped {len(high_missing)} cols with >40% missing")
 
     if verbose:
         print(f"✅ Housing loaded: {X.shape[0]} rows × {X.shape[1]} features")
-        print(f"   Target range: ${y.min():,.0f} – ${y.max():,.0f}")
+        print(f"    Target range: ${y.min():,.0f} – ${y.max():,.0f}")
 
     return X, y
 
