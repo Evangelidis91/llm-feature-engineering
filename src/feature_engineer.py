@@ -111,7 +111,8 @@ def apply_features(
     )
 
     # Build the eval namespace: safe builtins + every column as a variable
-    namespace = {**SAFE_NAMESPACE, **{c: out[c] for c in out.columns}}
+    # Also expose `df` so formulas can use df['col'] style (some LLMs prefer it)
+    namespace = {**SAFE_NAMESPACE, "df": out, **{c: out[c] for c in out.columns}}
 
     for suggestion in suggestions:
         name = suggestion.get("name", "<unnamed>")
