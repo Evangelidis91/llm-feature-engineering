@@ -443,6 +443,302 @@
         "formula": "MonthlyCharges / (tenure + 1)",
         "rationale": "The ratio of monthly charges to tenure might capture the relative cost over time, which could influence churn."
       }
+    ],
+    "gpt-5.5__zero_shot": [
+      {
+        "name": "month_to_month_electronic_check",
+        "formula": "(Contract == 'Month-to-month').astype(int) * (PaymentMethod == 'Electronic check').astype(int)",
+        "rationale": "Month-to-month customers paying by electronic check are often higher-risk churners."
+      },
+      {
+        "name": "fiber_without_online_security",
+        "formula": "(InternetService == 'Fiber optic').astype(int) * (OnlineSecurity == 'No').astype(int)",
+        "rationale": "Fiber customers without security services may be more price-sensitive or dissatisfied."
+      },
+      {
+        "name": "tenure_adjusted_monthly_charge",
+        "formula": "MonthlyCharges / (tenure + 1)",
+        "rationale": "High monthly cost early in the customer lifecycle can indicate churn risk."
+      },
+      {
+        "name": "estimated_total_charge_gap",
+        "formula": "TotalCharges - (MonthlyCharges * tenure)",
+        "rationale": "Differences between billed total and expected charges may capture discounts, changes, or billing anomalies."
+      },
+      {
+        "name": "missing_support_services_count",
+        "formula": "(OnlineSecurity == 'No').astype(int) + (OnlineBackup == 'No').astype(int) + (DeviceProtection == 'No').astype(int) + (TechSupport == 'No').astype(int)",
+        "rationale": "Customers lacking multiple support services may have weaker engagement with the provider."
+      },
+      {
+        "name": "streaming_services_count",
+        "formula": "(StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int)",
+        "rationale": "Streaming add-ons can reflect deeper service usage and potentially lower churn."
+      },
+      {
+        "name": "family_commitment_score",
+        "formula": "(Partner == 'Yes').astype(int) + (Dependents == 'Yes').astype(int)",
+        "rationale": "Customers with household ties may have different churn behavior than single customers."
+      }
+    ],
+    "claude-opus-4.6__zero_shot": [
+      {
+        "name": "avg_monthly_charge_by_tenure",
+        "formula": "TotalCharges / (tenure + 1)",
+        "rationale": "Captures the effective average monthly spend normalized by tenure, revealing pricing trajectory versus stated MonthlyCharges"
+      },
+      {
+        "name": "tenure_monthly_charge_ratio",
+        "formula": "tenure / (MonthlyCharges + 1)",
+        "rationale": "Customers with long tenure but low charges may be loyal bargain seekers, while short tenure with high charges signals churn risk"
+      },
+      {
+        "name": "no_protection_services",
+        "formula": "((OnlineSecurity == 'No').astype(int) + (OnlineBackup == 'No').astype(int) + (DeviceProtection == 'No').astype(int) + (TechSupport == 'No').astype(int))",
+        "rationale": "Customers lacking protective add-on services have fewer switching costs and weaker engagement, increasing churn likelihood"
+      },
+      {
+        "name": "month_to_month_high_charge",
+        "formula": "((Contract == 'Month-to-month') & (MonthlyCharges > 70)).astype(int)",
+        "rationale": "Month-to-month customers paying above-median charges face both low commitment and high cost pressure, a strong churn signal"
+      },
+      {
+        "name": "streaming_bundle",
+        "formula": "((StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int))",
+        "rationale": "Customers using streaming services are more engaged with the platform, and bundling both may reduce churn propensity"
+      },
+      {
+        "name": "new_customer_no_contract",
+        "formula": "((tenure <= 6) & (Contract == 'Month-to-month')).astype(int)",
+        "rationale": "New customers on month-to-month contracts are in the highest risk window before loyalty develops"
+      },
+      {
+        "name": "electronic_paperless_flag",
+        "formula": "((PaymentMethod == 'Electronic check') & (PaperlessBilling == 'Yes')).astype(int)",
+        "rationale": "Electronic check with paperless billing is associated with less deliberate payment setup and historically correlates with higher churn"
+      }
+    ],
+    "gemini-3.1-pro__zero_shot": [
+      {
+        "name": "average_historical_monthly_charge",
+        "formula": "TotalCharges / np.where(tenure == 0, 1, tenure)",
+        "rationale": "Calculates the historical average monthly spend to help identify if recent price hikes are driving churn."
+      },
+      {
+        "name": "total_additional_services",
+        "formula": "(OnlineSecurity == 'Yes').astype(int) + (OnlineBackup == 'Yes').astype(int) + (DeviceProtection == 'Yes').astype(int) + (TechSupport == 'Yes').astype(int) + (StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int)",
+        "rationale": "Customers with more embedded services are typically stickier and less likely to churn."
+      },
+      {
+        "name": "is_family_unit",
+        "formula": "((Partner == 'Yes') | (Dependents == 'Yes')).astype(int)",
+        "rationale": "Customers with partners or dependents often have more stable living situations and lower churn rates."
+      },
+      {
+        "name": "high_risk_profile",
+        "formula": "((Contract == 'Month-to-month') & (PaymentMethod == 'Electronic check')).astype(int)",
+        "rationale": "Month-to-month contracts combined with non-automatic electronic check payments historically show the highest churn risk."
+      },
+      {
+        "name": "cost_per_service",
+        "formula": "MonthlyCharges / (1 + (OnlineSecurity == 'Yes').astype(int) + (OnlineBackup == 'Yes').astype(int) + (DeviceProtection == 'Yes').astype(int) + (TechSupport == 'Yes').astype(int) + (StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int))",
+        "rationale": "Normalizes the monthly bill by the number of services received to estimate the customer's perceived value for money."
+      },
+      {
+        "name": "is_auto_pay",
+        "formula": "((PaymentMethod == 'Bank transfer (automatic)') | (PaymentMethod == 'Credit card (automatic)')).astype(int)",
+        "rationale": "Customers enrolled in automatic payments require active effort to churn, significantly reducing passive cancellations."
+      },
+      {
+        "name": "streaming_heavy_user",
+        "formula": "((StreamingTV == 'Yes') & (StreamingMovies == 'Yes')).astype(int)",
+        "rationale": "Identifies customers using the provider primarily for entertainment, who might be highly sensitive to internet quality or competitor pricing."
+      }
+    ],
+    "deepseek-v4__zero_shot": [
+      {
+        "name": "avg_monthly_charge_per_service",
+        "formula": "MonthlyCharges / (1 + (PhoneService == 'Yes').astype(int) + (InternetService != 'No').astype(int) + (OnlineSecurity == 'Yes').astype(int) + (OnlineBackup == 'Yes').astype(int) + (DeviceProtection == 'Yes').astype(int) + (TechSupport == 'Yes').astype(int) + (StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int))",
+        "rationale": "Captures cost efficiency perception by normalizing monthly charges against the number of subscribed services."
+      },
+      {
+        "name": "tenure_to_monthly_charges_ratio",
+        "formula": "tenure / (MonthlyCharges + 1)",
+        "rationale": "Measures loyalty relative to spending, where long-tenure low-spend customers may behave differently than short-tenure high-spend ones."
+      },
+      {
+        "name": "is_single_no_dependents",
+        "formula": "((Partner == 'No') & (Dependents == 'No')).astype(int)",
+        "rationale": "Flags customers living alone who may have different churn patterns due to lack of household constraints or shared decision-making."
+      },
+      {
+        "name": "has_premium_tech_support",
+        "formula": "((TechSupport == 'Yes') & (DeviceProtection == 'Yes') & (OnlineSecurity == 'Yes')).astype(int)",
+        "rationale": "Identifies customers with full premium protection suite, indicating high stickiness or higher expectations."
+      },
+      {
+        "name": "monthly_charges_senior_interaction",
+        "formula": "MonthlyCharges * SeniorCitizen",
+        "rationale": "Captures interaction between high charges and senior status, as seniors on expensive plans may be more price-sensitive."
+      },
+      {
+        "name": "is_fiber_no_security",
+        "formula": "((InternetService == 'Fiber optic') & (OnlineSecurity == 'No')).astype(int)",
+        "rationale": "Flags high-speed internet users without security add-on, a segment known to have elevated churn risk."
+      },
+      {
+        "name": "tenure_bucket_under_12_months",
+        "formula": "(tenure < 12).astype(int)",
+        "rationale": "Creates a binary flag for new customers in their first year, a critical churn window."
+      }
+    ],
+    "gpt-5.5__with_stats": [
+      {
+        "name": "avg_charge_gap",
+        "formula": "MonthlyCharges - (TotalCharges / tenure.clip(lower=1))",
+        "rationale": "A large gap between current monthly charge and historical average spend may indicate recent plan or pricing changes linked to churn."
+      },
+      {
+        "name": "total_to_monthly_ratio",
+        "formula": "TotalCharges / MonthlyCharges.clip(lower=1)",
+        "rationale": "This approximates paid months and can expose inconsistencies or tenure-spend patterns beyond raw tenure."
+      },
+      {
+        "name": "is_short_tenure",
+        "formula": "np.where(tenure <= 12, 1, 0)",
+        "rationale": "Customers in their first year often have different churn risk than long-tenured customers."
+      },
+      {
+        "name": "is_high_monthly_charge",
+        "formula": "np.where(MonthlyCharges >= 80, 1, 0)",
+        "rationale": "MonthlyCharges ranges up to 118.75, and high-cost customers may be more price-sensitive."
+      },
+      {
+        "name": "month_to_month_fiber",
+        "formula": "(Contract == 'Month-to-month').astype(int) * (InternetService == 'Fiber optic').astype(int)",
+        "rationale": "Fiber customers on flexible month-to-month contracts may combine high cost with low switching friction."
+      },
+      {
+        "name": "electronic_check_month_to_month",
+        "formula": "(PaymentMethod == 'Electronic check').astype(int) * (Contract == 'Month-to-month').astype(int)",
+        "rationale": "Electronic check users on month-to-month contracts are a known high-risk churn segment."
+      },
+      {
+        "name": "support_security_missing_count",
+        "formula": "(OnlineSecurity == 'No').astype(int) + (OnlineBackup == 'No').astype(int) + (DeviceProtection == 'No').astype(int) + (TechSupport == 'No').astype(int)",
+        "rationale": "Customers lacking multiple protective or support services may have lower engagement and higher churn risk."
+      }
+    ],
+    "claude-opus-4.6__with_stats": [
+      {
+        "name": "avg_monthly_charge",
+        "formula": "TotalCharges / (tenure + 1)",
+        "rationale": "Approximates the effective average monthly spend over the customer's lifetime, revealing pricing trajectory versus current MonthlyCharges."
+      },
+      {
+        "name": "tenure_monthly_ratio",
+        "formula": "tenure * MonthlyCharges / (TotalCharges + 1)",
+        "rationale": "Ratio close to 1 means stable pricing; deviations flag recent plan changes or promotions that may correlate with churn."
+      },
+      {
+        "name": "short_tenure_month_to_month",
+        "formula": "((Contract == 'Month-to-month') & (tenure <= 12)).astype(int)",
+        "rationale": "New customers on month-to-month contracts are the highest churn risk segment; this interaction captures that directly."
+      },
+      {
+        "name": "num_premium_services",
+        "formula": "(OnlineSecurity == 'Yes').astype(int) + (OnlineBackup == 'Yes').astype(int) + (DeviceProtection == 'Yes').astype(int) + (TechSupport == 'Yes').astype(int) + (StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int)",
+        "rationale": "Customers using more add-on services are more engaged and stickier, so a count of active services proxies switching cost."
+      },
+      {
+        "name": "high_charge_no_support",
+        "formula": "((MonthlyCharges > 70) & (TechSupport == 'No') & (OnlineSecurity == 'No')).astype(int)",
+        "rationale": "Customers paying above-median charges without support/security services may feel they get poor value, increasing churn likelihood."
+      },
+      {
+        "name": "contract_security_score",
+        "formula": "(Contract == 'Two year').astype(int) * 2 + (Contract == 'One year').astype(int) * 1 + (Partner == 'Yes').astype(int) + (Dependents == 'Yes').astype(int)",
+        "rationale": "Combines contractual commitment with household ties; higher scores indicate stronger retention anchors."
+      },
+      {
+        "name": "electronic_check_paperless",
+        "formula": "((PaymentMethod == 'Electronic check') & (PaperlessBilling == 'Yes')).astype(int)",
+        "rationale": "Electronic check payers with paperless billing historically show the highest churn rate; this interaction isolates that risky payment profile."
+      }
+    ],
+    "gemini-3.1-pro__with_stats": [
+      {
+        "name": "avg_historical_monthly_charge",
+        "formula": "TotalCharges / tenure.clip(lower=1)",
+        "rationale": "Calculates the historical average monthly spend to compare against current MonthlyCharges, helping identify price increases that may trigger churn."
+      },
+      {
+        "name": "is_high_risk_contract",
+        "formula": "(Contract == 'Month-to-month').astype(int)",
+        "rationale": "Month-to-month contracts lack lock-in periods and historically exhibit significantly higher churn rates than one or two-year contracts."
+      },
+      {
+        "name": "total_additional_services",
+        "formula": "(OnlineSecurity == 'Yes').astype(int) + (OnlineBackup == 'Yes').astype(int) + (DeviceProtection == 'Yes').astype(int) + (TechSupport == 'Yes').astype(int) + (StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int)",
+        "rationale": "Customers with more embedded services are generally stickier and have higher switching costs, making them less likely to churn."
+      },
+      {
+        "name": "has_family_support",
+        "formula": "((Partner == 'Yes') | (Dependents == 'Yes')).astype(int)",
+        "rationale": "Customers with partners or dependents often have more stable household situations and lower churn compared to single users."
+      },
+      {
+        "name": "is_automatic_payment",
+        "formula": "PaymentMethod.str.contains('automatic').astype(int)",
+        "rationale": "Automatic payments reduce the friction of billing and typically decrease both accidental and intentional churn."
+      },
+      {
+        "name": "charge_to_tenure_ratio",
+        "formula": "MonthlyCharges / tenure.clip(lower=1)",
+        "rationale": "High monthly charges early in the customer lifecycle (low tenure) can indicate a high risk of early churn due to sticker shock."
+      },
+      {
+        "name": "expected_vs_actual_charges",
+        "formula": "(tenure * MonthlyCharges) - TotalCharges",
+        "rationale": "Measures the discrepancy between expected lifetime value and actual total charges, highlighting historical discounts or hidden fees."
+      }
+    ],
+    "deepseek-v4__with_stats": [
+      {
+        "name": "is_new_customer",
+        "formula": "(tenure <= 12).astype(int)",
+        "rationale": "Customers with tenure under 12 months are much more likely to churn."
+      },
+      {
+        "name": "avg_monthly_charge",
+        "formula": "TotalCharges / (tenure + 1)",
+        "rationale": "Calculates effective average monthly charge, revealing possible billing changes or inconsistencies."
+      },
+      {
+        "name": "senior_month_to_month",
+        "formula": "((SeniorCitizen == 1) & (Contract == 'Month-to-month')).astype(int)",
+        "rationale": "Senior citizens on month-to-month contracts likely have very high churn risk."
+      },
+      {
+        "name": "num_online_services",
+        "formula": "(OnlineSecurity == 'Yes').astype(int) + (OnlineBackup == 'Yes').astype(int) + (DeviceProtection == 'Yes').astype(int) + (TechSupport == 'Yes').astype(int) + (StreamingTV == 'Yes').astype(int) + (StreamingMovies == 'Yes').astype(int)",
+        "rationale": "Count of additional services reflects customer stickiness and engagement depth."
+      },
+      {
+        "name": "no_internet",
+        "formula": "(InternetService == 'No').astype(int)",
+        "rationale": "Segment customers with no internet service as they exhibit different churn patterns."
+      },
+      {
+        "name": "pays_electronic_check",
+        "formula": "(PaymentMethod == 'Electronic check').astype(int)",
+        "rationale": "Electronic check payment method is a known strong predictor of churn."
+      },
+      {
+        "name": "single_no_dependents",
+        "formula": "((Partner == 'No') & (Dependents == 'No')).astype(int)",
+        "rationale": "Single customers without dependents often have lower switching costs and higher churn rates."
+      }
     ]
   },
   "housing": {
@@ -889,6 +1185,302 @@
         "formula": "BsmtFin_SF_1 + BsmtFin_SF_2",
         "rationale": "Summing the finished basement areas gives a measure of usable basement space."
       }
+    ],
+    "gpt-5.5__zero_shot": [
+      {
+        "name": "total_livable_area",
+        "formula": "df['Gr_Liv_Area'].fillna(0) + df['Total_Bsmt_SF'].fillna(0)",
+        "rationale": "Combines above-grade living space with basement space to better capture total usable house size."
+      },
+      {
+        "name": "quality_living_area_interaction",
+        "formula": "df['Overall_Qual'].fillna(0) * df['Gr_Liv_Area'].fillna(0)",
+        "rationale": "Large homes with higher overall quality often command disproportionately higher prices."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "df['Full_Bath'].fillna(0) + 0.5 * df['Half_Bath'].fillna(0) + df['Bsmt_Full_Bath'].fillna(0) + 0.5 * df['Bsmt_Half_Bath'].fillna(0)",
+        "rationale": "Aggregates all full and half bathrooms into a single convenience measure."
+      },
+      {
+        "name": "house_age_at_sale",
+        "formula": "(df['Yr_Sold'] - df['Year_Built']).clip(lower=0)",
+        "rationale": "Newer homes generally sell for more, so age at sale captures depreciation and modernization effects."
+      },
+      {
+        "name": "basement_finished_ratio",
+        "formula": "(df['BsmtFin_SF_1'].fillna(0) + df['BsmtFin_SF_2'].fillna(0)) / df['Total_Bsmt_SF'].fillna(0).clip(lower=1)",
+        "rationale": "The share of finished basement space reflects how usable and valuable the basement is."
+      },
+      {
+        "name": "garage_capacity_area_interaction",
+        "formula": "df['Garage_Cars'].fillna(0) * df['Garage_Area'].fillna(0)",
+        "rationale": "Combines garage capacity and size to represent overall garage utility."
+      },
+      {
+        "name": "outdoor_amenity_area",
+        "formula": "df['Wood_Deck_SF'].fillna(0) + df['Open_Porch_SF'].fillna(0) + df['Enclosed_Porch'].fillna(0) + df['_3Ssn_Porch'].fillna(0) + df['Screen_Porch'].fillna(0) + df['Pool_Area'].fillna(0)",
+        "rationale": "Summarizes outdoor living and recreation spaces that can increase buyer appeal."
+      }
+    ],
+    "claude-opus-4.6__zero_shot": [
+      {
+        "name": "total_sf",
+        "formula": "Total_Bsmt_SF + _1st_Flr_SF + _2nd_Flr_SF",
+        "rationale": "Total finished square footage across all floors is one of the strongest predictors of sale price"
+      },
+      {
+        "name": "qual_x_area",
+        "formula": "Overall_Qual * Gr_Liv_Area",
+        "rationale": "Interaction between quality and living area captures the premium that quality adds per square foot"
+      },
+      {
+        "name": "house_age_at_sale",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Age of the house at time of sale directly affects depreciation and perceived value"
+      },
+      {
+        "name": "remod_age_at_sale",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "Years since last remodel captures how recently the home was updated, affecting buyer willingness to pay"
+      },
+      {
+        "name": "total_bath",
+        "formula": "Full_Bath + 0.5 * Half_Bath + Bsmt_Full_Bath + 0.5 * Bsmt_Half_Bath",
+        "rationale": "A single weighted bathroom count summarizes bathroom amenities which strongly influence price"
+      },
+      {
+        "name": "garage_interaction",
+        "formula": "Garage_Cars * Garage_Area",
+        "rationale": "Interaction of garage capacity and size captures the overall garage utility better than either alone"
+      },
+      {
+        "name": "bsmt_fin_ratio",
+        "formula": "(BsmtFin_SF_1 + BsmtFin_SF_2) / Total_Bsmt_SF.clip(lower=1)",
+        "rationale": "Proportion of basement that is finished indicates usable living space versus raw unfinished area"
+      }
+    ],
+    "gemini-3.1-pro__zero_shot": [
+      {
+        "name": "total_sqft",
+        "formula": "Total_Bsmt_SF.fillna(0) + Gr_Liv_Area",
+        "rationale": "Total living area is typically the strongest predictor of a home's price."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "Full_Bath + (0.5 * Half_Bath) + Bsmt_Full_Bath.fillna(0) + (0.5 * Bsmt_Half_Bath.fillna(0))",
+        "rationale": "Aggregating all bathrooms into a single metric provides a comprehensive view of the home's utility."
+      },
+      {
+        "name": "house_age_at_sale",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Older homes generally sell for less unless they are historic, capturing depreciation over time."
+      },
+      {
+        "name": "overall_quality_condition_index",
+        "formula": "Overall_Qual * Overall_Cond",
+        "rationale": "An interaction term between quality and condition captures the compounding effect of a well-built and well-maintained home."
+      },
+      {
+        "name": "total_outdoor_space",
+        "formula": "Wood_Deck_SF + Open_Porch_SF + Enclosed_Porch + _3Ssn_Porch + Screen_Porch",
+        "rationale": "Combining all deck and porch areas creates a single feature representing the total usable outdoor living space."
+      },
+      {
+        "name": "is_new_construction",
+        "formula": "(Yr_Sold == Year_Built).astype(int)",
+        "rationale": "Brand new homes often command a premium price compared to older homes."
+      },
+      {
+        "name": "yard_size",
+        "formula": "Lot_Area - _1st_Flr_SF",
+        "rationale": "Subtracting the first floor footprint from the lot area estimates the actual yard space available."
+      }
+    ],
+    "deepseek-v4__zero_shot": [
+      {
+        "name": "total_finished_area",
+        "formula": "Gr_Liv_Area + BsmtFin_SF_1 + BsmtFin_SF_2",
+        "rationale": "Combines above-grade and finished basement square footage to capture total livable area."
+      },
+      {
+        "name": "house_age",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Age of the house at sale time often correlates negatively with price due to depreciation."
+      },
+      {
+        "name": "years_since_remodel",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "Recency of renovations can boost value, with smaller values indicating more modern updates."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "Full_Bath + 0.5 * Half_Bath + Bsmt_Full_Bath + 0.5 * Bsmt_Half_Bath",
+        "rationale": "Weighted sum of all bathrooms provides a single measure of bathing capacity."
+      },
+      {
+        "name": "lot_area_per_sqft",
+        "formula": "Lot_Area / Gr_Liv_Area",
+        "rationale": "Ratio of lot size to living area indicates spaciousness and potential for expansion."
+      },
+      {
+        "name": "garage_age",
+        "formula": "np.where(Garage_Cars > 0, Yr_Sold - Garage_Yr_Blt, 0)",
+        "rationale": "Age of the garage if present, otherwise 0, capturing garage condition indirectly."
+      },
+      {
+        "name": "total_porch_area",
+        "formula": "Open_Porch_SF + Enclosed_Porch + _3Ssn_Porch + Screen_Porch",
+        "rationale": "Total outdoor porch space adds to living enjoyment and may increase sale price."
+      }
+    ],
+    "gpt-5.5__with_stats": [
+      {
+        "name": "log_lot_area",
+        "formula": "np.log1p(df['Lot_Area'])",
+        "rationale": "Lot_Area is highly right-skewed with very large maximum values, so a log transform can stabilize its relationship with price."
+      },
+      {
+        "name": "total_finished_living_sf",
+        "formula": "df['Gr_Liv_Area'] + df['BsmtFin_SF_1'].fillna(0) + df['BsmtFin_SF_2'].fillna(0)",
+        "rationale": "Combines above-grade living area with finished basement space to better represent usable finished square footage."
+      },
+      {
+        "name": "quality_weighted_living_area",
+        "formula": "df['Overall_Qual'] * np.log1p(df['Gr_Liv_Area'])",
+        "rationale": "Captures the interaction between house size and overall quality, two strong drivers of sale price."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "df['Full_Bath'] + 0.5 * df['Half_Bath'] + df['Bsmt_Full_Bath'].fillna(0) + 0.5 * df['Bsmt_Half_Bath'].fillna(0)",
+        "rationale": "Aggregates full and half bathrooms across above-grade and basement areas into a single convenience measure."
+      },
+      {
+        "name": "house_age_at_sale",
+        "formula": "df['Yr_Sold'] - df['Year_Built']",
+        "rationale": "Newer homes generally command higher prices, making age at sale directly relevant."
+      },
+      {
+        "name": "years_since_remodel",
+        "formula": "df['Yr_Sold'] - df['Year_Remod_Add']",
+        "rationale": "Recent remodeling can increase value beyond the original construction year."
+      },
+      {
+        "name": "garage_capacity_score",
+        "formula": "df['Garage_Cars'].fillna(0) * np.log1p(df['Garage_Area'].fillna(0))",
+        "rationale": "Combines garage car capacity and area while reducing the influence of very large garages."
+      }
+    ],
+    "claude-opus-4.6__with_stats": [
+      {
+        "name": "total_sf",
+        "formula": "Total_Bsmt_SF.fillna(0) + _1st_Flr_SF + _2nd_Flr_SF",
+        "rationale": "Total living square footage across all floors is one of the strongest predictors of sale price."
+      },
+      {
+        "name": "overall_qual_x_gr_liv_area",
+        "formula": "Overall_Qual * Gr_Liv_Area",
+        "rationale": "Interaction between quality rating and living area captures the premium that quality adds per square foot."
+      },
+      {
+        "name": "house_age_at_sale",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Older houses generally sell for less; age at sale is a more direct measure than raw year built."
+      },
+      {
+        "name": "remod_age_at_sale",
+        "formula": "Yr_Sold - Year_Remod_Add",
+        "rationale": "Years since last remodel captures how recently the home was updated, which affects perceived condition and value."
+      },
+      {
+        "name": "total_bath",
+        "formula": "Full_Bath + 0.5 * Half_Bath + Bsmt_Full_Bath.fillna(0) + 0.5 * Bsmt_Half_Bath.fillna(0)",
+        "rationale": "A single total bathroom count (weighting half baths at 0.5) simplifies multiple bath columns into one strong predictor."
+      },
+      {
+        "name": "total_porch_sf",
+        "formula": "Wood_Deck_SF + Open_Porch_SF + Enclosed_Porch + _3Ssn_Porch + Screen_Porch",
+        "rationale": "Aggregating all outdoor living space into one feature captures the total amenity value of porches and decks."
+      },
+      {
+        "name": "log_lot_area",
+        "formula": "np.log1p(Lot_Area)",
+        "rationale": "Lot_Area is heavily right-skewed (max 215k vs mean 10k); a log transform reduces outlier influence and linearizes its relationship with price."
+      }
+    ],
+    "gemini-3.1-pro__with_stats": [
+      {
+        "name": "total_sqft",
+        "formula": "Total_Bsmt_SF.fillna(0) + Gr_Liv_Area",
+        "rationale": "Combines above-ground and basement living areas to represent the total usable space of the house, which is highly correlated with price."
+      },
+      {
+        "name": "total_baths",
+        "formula": "Full_Bath + 0.5 * Half_Bath + Bsmt_Full_Bath.fillna(0) + 0.5 * Bsmt_Half_Bath.fillna(0)",
+        "rationale": "Aggregates all bathrooms into a single metric, providing a comprehensive view of the home's bathroom amenities."
+      },
+      {
+        "name": "house_age_at_sale",
+        "formula": "Yr_Sold - Year_Built",
+        "rationale": "Calculates the exact age of the property at the time of sale, capturing depreciation and historical pricing trends."
+      },
+      {
+        "name": "total_outdoor_space",
+        "formula": "Wood_Deck_SF + Open_Porch_SF + Enclosed_Porch + _3Ssn_Porch + Screen_Porch",
+        "rationale": "Sums all deck and porch areas to quantify the total outdoor recreational space, adding value to the property."
+      },
+      {
+        "name": "overall_quality_condition",
+        "formula": "Overall_Qual * Overall_Cond",
+        "rationale": "Creates an interaction term between overall quality and condition to capture the compounded premium of a well-built and well-maintained home."
+      },
+      {
+        "name": "avg_room_size",
+        "formula": "Gr_Liv_Area / TotRms_AbvGrd",
+        "rationale": "Estimates the average size of rooms above ground, as buyers often prefer homes with larger, more spacious rooms."
+      },
+      {
+        "name": "is_remodeled",
+        "formula": "(Year_Remod_Add > Year_Built).astype(int)",
+        "rationale": "Flags whether a house has been remodeled since it was built, which typically increases its market value."
+      }
+    ],
+    "deepseek-v4__with_stats": [
+      {
+        "name": "total_living_area",
+        "formula": "(Gr_Liv_Area + Total_Bsmt_SF.fillna(0))",
+        "rationale": "Combines above-grade and basement square footage to capture total habitable space."
+      },
+      {
+        "name": "house_age",
+        "formula": "(Yr_Sold - Year_Built)",
+        "rationale": "Linear age of the house at time of sale often correlates negatively with price."
+      },
+      {
+        "name": "years_since_remodel",
+        "formula": "(Yr_Sold - Year_Remod_Add)",
+        "rationale": "Age of last remodel indicates update level and affects condition-related value."
+      },
+      {
+        "name": "total_bathrooms",
+        "formula": "(Full_Bath + 0.5 * Half_Bath + Bsmt_Full_Bath.fillna(0) + 0.5 * Bsmt_Half_Bath.fillna(0))",
+        "rationale": "Weighted sum of all bathrooms above and below grade gives a full bathroom equivalent."
+      },
+      {
+        "name": "total_outdoor_sf",
+        "formula": "(Wood_Deck_SF + Open_Porch_SF + Enclosed_Porch + _3Ssn_Porch + Screen_Porch)",
+        "rationale": "Aggregates all outdoor living areas (deck, porches) into one space metric."
+      },
+      {
+        "name": "has_garage",
+        "formula": "(Garage_Area.fillna(0) > 0).astype(int)",
+        "rationale": "Binary indicator for garage presence captures value beyond area alone."
+      },
+      {
+        "name": "overall_qual_cond_interaction",
+        "formula": "(Overall_Qual * Overall_Cond)",
+        "rationale": "Interaction of overall quality and condition to reflect combined effect on price."
+      }
     ]
   },
   "bank": {
@@ -1334,6 +1926,302 @@
         "name": "poutcome_success",
         "formula": "np.where(poutcome == 'success', 1, 0)",
         "rationale": "A binary feature indicating whether a previous marketing campaign was successful can capture the client's past engagement."
+      }
+    ],
+    "gpt-5.5__zero_shot": [
+      {
+        "name": "no_prior_contact_flag",
+        "formula": "(pdays == 999).astype(int)",
+        "rationale": "Clients never contacted before may respond differently from previously contacted clients."
+      },
+      {
+        "name": "previous_success_contacts",
+        "formula": "previous * (poutcome == 'success').astype(int)",
+        "rationale": "Prior successful campaign outcomes are strong signals of future subscription likelihood."
+      },
+      {
+        "name": "recency_adjusted_previous",
+        "formula": "previous / (pdays.clip(0, 999) + 1)",
+        "rationale": "Recent prior contacts may be more predictive than older contacts."
+      },
+      {
+        "name": "log_campaign_intensity",
+        "formula": "np.log1p(campaign)",
+        "rationale": "A log transform can capture diminishing returns from repeated contacts in the same campaign."
+      },
+      {
+        "name": "loan_burden_count",
+        "formula": "(housing == 'yes').astype(int) + (loan == 'yes').astype(int)",
+        "rationale": "Existing credit obligations may influence willingness to subscribe to a deposit."
+      },
+      {
+        "name": "age_campaign_interaction",
+        "formula": "age * campaign",
+        "rationale": "The effect of repeated contacts may vary across client age groups."
+      },
+      {
+        "name": "cellular_favorable_month_flag",
+        "formula": "(contact == 'cellular').astype(int) * ((month == 'mar').astype(int) + (month == 'sep').astype(int) + (month == 'oct').astype(int) + (month == 'dec').astype(int))",
+        "rationale": "Cellular contacts during historically responsive months may indicate higher subscription propensity."
+      }
+    ],
+    "claude-opus-4.6__zero_shot": [
+      {
+        "name": "no_previous_contact",
+        "formula": "(pdays == 999).astype(int)",
+        "rationale": "Flags clients never previously contacted, as pdays=999 indicates no prior contact which strongly differentiates conversion likelihood"
+      },
+      {
+        "name": "economic_pressure_index",
+        "formula": "emp.var.rate * cons.conf.idx",
+        "rationale": "Interaction between employment variation rate and consumer confidence captures compounded macroeconomic sentiment affecting deposit decisions"
+      },
+      {
+        "name": "euribor_employment_ratio",
+        "formula": "euribor3m / nr.employed",
+        "rationale": "Ratio of interest rate to employment level captures the relative attractiveness of term deposits given labor market conditions"
+      },
+      {
+        "name": "campaign_intensity_flag",
+        "formula": "(campaign > 3).astype(int)",
+        "rationale": "Flags over-contacted clients since excessive campaign contacts often signal diminishing returns and lower conversion probability"
+      },
+      {
+        "name": "previous_success",
+        "formula": "((poutcome == 'success') & (previous > 0)).astype(int)",
+        "rationale": "Clients with a previously successful outcome are far more likely to subscribe again, combining outcome with contact history"
+      },
+      {
+        "name": "contact_recency_x_previous",
+        "formula": "np.where(pdays == 999, 0, previous / (pdays + 1))",
+        "rationale": "Captures frequency of prior contacts relative to recency, identifying recently and actively engaged prospects"
+      },
+      {
+        "name": "cellular_march_interaction",
+        "formula": "((contact == 'cellular') & (month == 'mar')).astype(int)",
+        "rationale": "March via cellular shows high conversion rates; this interaction captures a known high-performing channel-timing combination"
+      }
+    ],
+    "gemini-3.1-pro__zero_shot": [
+      {
+        "name": "is_previously_contacted",
+        "formula": "np.where(pdays == 999, 0, 1)",
+        "rationale": "Clients who have been contacted in previous campaigns are often more receptive to new offers than first-time contacts."
+      },
+      {
+        "name": "campaign_to_previous_ratio",
+        "formula": "campaign / (previous + 1)",
+        "rationale": "A high ratio indicates aggressive current campaigning without a history of prior engagement, which may negatively impact subscription likelihood."
+      },
+      {
+        "name": "high_financial_burden",
+        "formula": "((housing == 'yes') & (loan == 'yes')).astype(int)",
+        "rationale": "Clients with multiple existing loans may have less disposable income to lock away in a term deposit."
+      },
+      {
+        "name": "is_high_conversion_demographic",
+        "formula": "((job == 'retired') | (job == 'student')).astype(int)",
+        "rationale": "Students and retirees historically show higher conversion rates for term deposits due to different savings goals and financial life stages."
+      },
+      {
+        "name": "economic_stress_index",
+        "formula": "emp.var.rate * euribor3m",
+        "rationale": "Combining the employment variation rate and interest rates captures the broader macroeconomic climate's impact on consumer saving behavior."
+      },
+      {
+        "name": "total_contacts",
+        "formula": "campaign + previous",
+        "rationale": "The total number of interactions across all campaigns helps identify potential contact fatigue or persistent interest."
+      },
+      {
+        "name": "price_to_confidence_ratio",
+        "formula": "cons.price.idx / cons.conf.idx",
+        "rationale": "Evaluating the consumer price index relative to consumer confidence highlights periods where high costs meet low confidence, typically reducing investments."
+      }
+    ],
+    "deepseek-v4__zero_shot": [
+      {
+        "name": "age_retired_interaction",
+        "formula": "age * (job == 'retired').astype(int)",
+        "rationale": "Captures the interaction between age and being retired, as older retirees may have different savings behavior."
+      },
+      {
+        "name": "success_cellular",
+        "formula": "((poutcome == 'success') & (contact == 'cellular')).astype(int)",
+        "rationale": "Flags clients who were successfully contacted via cellular in a previous campaign, indicating higher engagement."
+      },
+      {
+        "name": "campaign_previous_ratio",
+        "formula": "campaign / (previous + 1)",
+        "rationale": "Measures current campaign intensity relative to past contacts, highlighting aggressive recent outreach."
+      },
+      {
+        "name": "single_unemployed",
+        "formula": "((job == 'unemployed') & (marital == 'single')).astype(int)",
+        "rationale": "Identifies single unemployed individuals who may have distinct financial priorities and lower propensity."
+      },
+      {
+        "name": "econ_stress",
+        "formula": "emp.var.rate * euribor3m",
+        "rationale": "Combines employment variation and short-term interest rate to reflect overall economic pressure."
+      },
+      {
+        "name": "previously_contacted",
+        "formula": "(pdays != 999).astype(int)",
+        "rationale": "Indicates whether the client was contacted in a previous campaign, a strong signal of past engagement."
+      },
+      {
+        "name": "housing_loan_burden",
+        "formula": "((housing == 'yes') & (loan == 'yes')).astype(int)",
+        "rationale": "Flags clients with both housing and personal loans, suggesting higher financial obligations that may reduce subscription likelihood."
+      }
+    ],
+    "gpt-5.5__with_stats": [
+      {
+        "name": "young_or_senior_flag",
+        "formula": "np.where(df['age'] < 25, 1, np.where(df['age'] > 60, 1, 0))",
+        "rationale": "Subscription propensity may be nonlinear for very young and older clients compared with middle-aged clients."
+      },
+      {
+        "name": "log_campaign_contacts",
+        "formula": "np.log1p(df['campaign'])",
+        "rationale": "Campaign contacts are right-skewed with a max of 56, so a log transform can reduce outlier impact."
+      },
+      {
+        "name": "pdays_recency_score",
+        "formula": "np.where(df['pdays'] == 999, 0, 1 / (df['pdays'] + 1))",
+        "rationale": "The special value 999 indicates no prior contact, while smaller pdays values imply more recent engagement."
+      },
+      {
+        "name": "previous_success_intensity_recency",
+        "formula": "(df['poutcome'] == 'success').astype(int) * np.log1p(df['previous']) * np.where(df['pdays'] == 999, 0, 1 / (df['pdays'] + 1))",
+        "rationale": "Recent prior success combined with more previous contacts may strongly signal willingness to subscribe."
+      },
+      {
+        "name": "credit_unknown_count",
+        "formula": "(df['default'] == 'unknown').astype(int) + (df['housing'] == 'unknown').astype(int) + (df['loan'] == 'unknown').astype(int)",
+        "rationale": "Unknown credit-related fields may encode data availability or customer profile differences."
+      },
+      {
+        "name": "macro_rate_employment_interaction",
+        "formula": "df['emp.var.rate'] * df['euribor3m']",
+        "rationale": "Employment variation and interest rates jointly capture macroeconomic conditions affecting deposit demand."
+      },
+      {
+        "name": "consumer_confidence_price_ratio",
+        "formula": "df['cons.conf.idx'] / df['cons.price.idx']",
+        "rationale": "Scaling consumer confidence by the price index may summarize purchasing sentiment under inflation conditions."
+      }
+    ],
+    "claude-opus-4.6__with_stats": [
+      {
+        "name": "contact_cellular_flag",
+        "formula": "(contact == 'cellular').astype(int)",
+        "rationale": "Cellular contact is likely more personal and effective, distinguishing modern reachable clients from telephone-only ones."
+      },
+      {
+        "name": "previous_contacted_flag",
+        "formula": "(pdays != 999).astype(int)",
+        "rationale": "pdays=999 means the client was never previously contacted; having prior contact history is a strong predictor of conversion."
+      },
+      {
+        "name": "poutcome_success_flag",
+        "formula": "(poutcome == 'success').astype(int)",
+        "rationale": "Clients who succeeded in a previous campaign are far more likely to subscribe again, making this a high-signal binary feature."
+      },
+      {
+        "name": "economic_stress_index",
+        "formula": "emp.var.rate * cons.conf.idx",
+        "rationale": "Interaction of employment variation rate and consumer confidence captures compounded economic sentiment affecting subscription likelihood."
+      },
+      {
+        "name": "campaign_intensity_log",
+        "formula": "np.log1p(campaign)",
+        "rationale": "Log-transforming campaign contacts reduces right skew (max=56, mean=2.57) and captures diminishing returns of repeated contacts."
+      },
+      {
+        "name": "euribor_employment_ratio",
+        "formula": "euribor3m / nr.employed * 1000",
+        "rationale": "Ratio of interest rate to employment level proxies the macro-financial environment; low rates with high employment may boost deposits."
+      },
+      {
+        "name": "age_retired_or_student",
+        "formula": "np.where((age > 60) | (age < 25), 1, 0)",
+        "rationale": "Young students and older retirees have different financial behaviors and historically higher subscription rates in bank marketing campaigns."
+      }
+    ],
+    "gemini-3.1-pro__with_stats": [
+      {
+        "name": "was_contacted_previously",
+        "formula": "np.where(pdays != 999, 1, 0)",
+        "rationale": "Separates clients who were previously contacted from the vast majority (pdays=999) who were not."
+      },
+      {
+        "name": "total_contacts",
+        "formula": "campaign + previous",
+        "rationale": "Captures the overall contact intensity across both the current and all previous campaigns."
+      },
+      {
+        "name": "is_senior",
+        "formula": "np.where(age >= 60, 1, 0)",
+        "rationale": "Identifies retirement-age clients who typically have different savings behaviors and higher term deposit subscription rates."
+      },
+      {
+        "name": "previous_success_flag",
+        "formula": "np.where(poutcome == 'success', 1, 0)",
+        "rationale": "Directly flags clients who have a proven track record of saying yes to previous marketing campaigns."
+      },
+      {
+        "name": "log_campaign",
+        "formula": "np.log1p(campaign)",
+        "rationale": "Reduces the right-skewness of the campaign contacts distribution to mitigate the impact of extreme outliers."
+      },
+      {
+        "name": "conf_price_ratio",
+        "formula": "cons.conf.idx / cons.price.idx",
+        "rationale": "Creates a composite macroeconomic indicator balancing consumer confidence against the current price index."
+      },
+      {
+        "name": "has_financial_obligations",
+        "formula": "np.where((default == 'yes') | (loan == 'yes'), 1, 0)",
+        "rationale": "Groups clients with existing credit defaults or personal loans, as financial strain likely reduces their ability to invest in term deposits."
+      }
+    ],
+    "deepseek-v4__with_stats": [
+      {
+        "name": "was_contacted_before",
+        "formula": "(pdays != 999).astype(int)",
+        "rationale": "Indicator that the client has been contacted in a previous campaign, which often correlates with higher response rates."
+      },
+      {
+        "name": "poutcome_success",
+        "formula": "(poutcome == 'success').astype(int)",
+        "rationale": "Past campaign success is one of the strongest direct indicators of a potential future subscription."
+      },
+      {
+        "name": "contact_cellular",
+        "formula": "(contact == 'cellular').astype(int)",
+        "rationale": "Cellular contact typically yields higher engagement and conversion compared to landline telephone."
+      },
+      {
+        "name": "default_yes",
+        "formula": "(default == 'yes').astype(int)",
+        "rationale": "Having credit default may signal financial distress that affects the willingness to lock funds in a term deposit."
+      },
+      {
+        "name": "total_contacts",
+        "formula": "campaign + previous",
+        "rationale": "Sum of current and previous contacts captures overall marketing outreach intensity experienced by the client."
+      },
+      {
+        "name": "high_euribor",
+        "formula": "(euribor3m > 4).astype(int)",
+        "rationale": "A high three\u2011month Euribor rate can make term deposit offers more financially attractive."
+      },
+      {
+        "name": "day_thu",
+        "formula": "(day_of_week == 'thu').astype(int)",
+        "rationale": "Thursday shows the highest contact volume and may capture a weekday\u2011specific effect on conversion."
       }
     ]
   }
