@@ -81,26 +81,26 @@ class ApplicationReport:
 # =====================================================================
 # Core function
 # =====================================================================
+import numpy as np
+import pandas as pd
 def apply_features(
-        df: pd.DataFrame,
-        suggestions: list[dict],
-        dataset_name: str = "",
-        llm: str = "",
-        prompt_variant: str = "",
-        verbose: bool = False,
-) -> tuple[pd.DataFrame, ApplicationReport]:
+    df: pd.DataFrame,
+    suggestions: list[dict],
+    dataset_name: str = "",
+    llm: str = "",
+    prompt_variant: str = "",
+    verbose: bool = False,
+) -> tuple[pd.DataFrame, "ApplicationReport"]:
     """Apply a list of LLM-suggested features to df.
 
     Args:
-      df: input DataFrame (won't be modified)
-      suggestions: list of dicts with keys 'name', 'formula', 'rationale'
-      dataset_name, llm,
-      prompt_variant: metadata for the report
+        df: input DataFrame (won't be modified)
+        suggestions: list of dicts with keys 'name', 'formula', 'rationale'
+        dataset_name, llm, prompt_variant: metadata for the report
 
     Returns:
         (augmented DataFrame, ApplicationReport)
     """
-
     out = df.copy()
     report = ApplicationReport(
         dataset_name=dataset_name,
@@ -120,13 +120,15 @@ def apply_features(
 
         # Skip if the feature already exists
         if name in out.columns:
-            report.results.append(FeatureResult(
-                name=name,
-                formula=formula,
-                rationale=rationale,
-                success=False,
-                error="name already exists",
-            ))
+            report.results.append(
+                FeatureResult(
+                    name=name,
+                    formula=formula,
+                    rationale=rationale,
+                    success=False,
+                    error="name already exists",
+                )
+            )
             if verbose:
                 print(f"   ✗ {name}: name collision")
             continue
@@ -135,13 +137,15 @@ def apply_features(
         try:
             new_col = eval(formula, {"__builtins__": {}}, namespace)
         except Exception as e:
-            report.results.append(FeatureResult(
-                name=name,
-                formula=formula,
-                rationale=rationale,
-                success=False,
-                error=f"{type(e).__name__}: {e}",
-            ))
+            report.results.append(
+                FeatureResult(
+                    name=name,
+                    formula=formula,
+                    rationale=rationale,
+                    success=False,
+                    error=f"{type(e).__name__}: {e}",
+                )
+            )
             if verbose:
                 print(f"   ✗ {name}: {type(e).__name__}: {e}")
             continue
@@ -150,36 +154,83 @@ def apply_features(
         try:
             new_col = pd.Series(new_col, index=out.index)
         except Exception as e:
-            report.results.append(FeatureResult(
-                name=name,
-                formula=formula,
-                rationale=rationale,
-                success=False,
-                error=f"could not convert to Series: {e}",
-            ))
+            report.results.append(
+                FeatureResult(
+                    name=name,
+                    formula=formula,
+                    rationale=rationale,
+                    success=False,
+                    error=f"could not convert to Series: {e}",
+                )
+            )
             if verbose:
                 print(f"   ✗ {name}: could not convert to Series")
             continue
 
-        # Cast booleans to int() handle numeric variables
+        # Cast booleans to int
         if new_col.dtype == bool:
             new_col = new_col.astype(int)
 
-        # Reject if it's all NaN or a constant (won't help any model)
+        # Reject if result contains infinity (sklearn won't accept it)
+        if pd.api.types.is_numeric_dtype(new_col) and np.isinf(new_col).any():
+            report.results.append(
+                FeatureResult(
+                    name=name,
+                    formula=formula,
+                    rationale=rationale,
+                    success=False,
+                    error="contains infinity (likely division by zero)",
+                )
+            )
+            if verbose:
+                print(f"   ✗ {name}: contains infinity")
+            continue
+
+        # Reject if it's all NaN
         if new_col.isna().all():
-            report.results.append(FeatureResult(
-                name=name, formula=formula, rationale=rationale,
-                success=False, error="all NaN result",
-            ))
+            report.results.append(
+                FeatureResult(
+                    name=name,
+                    formula=formula,
+                    rationale=rationale,
+                    success=False,
+                    error="all NaN result",
+                )
+            )
             if verbose:
                 print(f"   ✗ {name}: all NaN")
             continue
 
+        # Reject if mixed types (sklearn encoders need uniform types)
+        if new_col.dtype == object:
+            non_null = new_col.dropna()
+            if len(non_null) > 0:
+                types = set(type(v).__name__ for v in non_null)
+                if len(types) > 1:
+                    report.results.append(
+                        FeatureResult(
+                            name=name,
+                            formula=formula,
+                            rationale=rationale,
+                            success=False,
+                            error=f"mixed types in column: {sorted(types)}",
+                        )
+                    )
+                    if verbose:
+                        print(f"   ✗ {name}: mixed types {sorted(types)}")
+                    continue
+
+        # Reject if constant
         if new_col.nunique(dropna=True) <= 1:
-            report.results.append(FeatureResult(
-                name=name, formula=formula, rationale=rationale,
-                    success=False, error="constant result",
-                ))
+            report.results.append(
+                FeatureResult(
+                    name=name,
+                    formula=formula,
+                    rationale=rationale,
+                    success=False,
+                    error="constant result",
+                )
+            )
             if verbose:
                 print(f"   ✗ {name}: constant")
             continue
@@ -187,12 +238,14 @@ def apply_features(
         # Success!
         out[name] = new_col
         namespace[name] = new_col  # later features can reference this one
-        report.results.append(FeatureResult(
-            name=name,
-            formula=formula,
-            rationale=rationale,
-            success=True,
-        ))
+        report.results.append(
+            FeatureResult(
+                name=name,
+                formula=formula,
+                rationale=rationale,
+                success=True,
+            )
+        )
         report.n_applied += 1
         if verbose:
             print(f"   ✓ {name}")
