@@ -17,6 +17,20 @@ All LLMs accessed via [OpenRouter](https://openrouter.ai) for unified API handli
 
 ---
 
+## 📁 File Inventory
+
+| File | Granularity | What's inside |
+|---|---|---|
+| `metrics_full.csv` ⭐ | per (dataset × model × feature_set × metric × fold) | The ground-truth file. **2,835 rows** covering 9 baselines + 180 LLM-augmented experiments × 3 metrics × 5 CV folds. Every chart, table, and finding is derived from this file. |
+| `metrics.csv` | per (dataset × model × metric × fold) — baselines only | The 9 baseline experiments. Saved before any LLM augmentation, kept as a reference snapshot. |
+| `llm_suggestions.json` | per (dataset × llm × prompt) | Parsed feature suggestions: 60 entries × ~7 features each = **420 suggestions** with `name` / `formula` / `rationale`. |
+| `llm_metrics.csv` | per LLM API call | Tokens (input/output/total), cost (USD), latency, success/error for each of the **60 API calls**. |
+| `validity_rates.csv` | per (dataset × llm × prompt) | How many features applied successfully against real data. Source of all "validity rate" numbers in the README. |
+| `llm_outputs/*.txt` | per API call | Raw, unparsed text returned by each LLM. Kept for reproducibility — re-parse with a different parser anytime. |
+| `figures/*.png` | — | All saved charts (validity heatmaps, cost analysis, baseline-vs-LLM, frontier-vs-production, improvement matrix). |
+
+---
+
 ## 📊 Key Results
 
 ### 1️⃣ Frontier ≈ Production (Statistically Indistinguishable)

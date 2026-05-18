@@ -68,7 +68,7 @@ housing,regression,random_forest,baseline,mae,0,15793.400264505119
 housing,regression,random_forest,baseline,mae,1,15142.775519665203
 housing,regression,random_forest,baseline,mae,2,16167.128759954494
 housing,regression,random_forest,baseline,mae,3,15784.197064846418
-housing,regression,random_forest,baseline,mae,4,15243.123728668943
+housing,regression,random_forest,baseline,mae,4,15243.12372866894
 housing,regression,random_forest,baseline,r2,0,0.9091083458014201
 housing,regression,random_forest,baseline,r2,1,0.8888449362554763
 housing,regression,random_forest,baseline,r2,2,0.8987671078080607
@@ -114,11 +114,11 @@ bank,classification,random_forest,baseline,f1,1,0.3695955369595537
 bank,classification,random_forest,baseline,f1,2,0.41140529531568226
 bank,classification,random_forest,baseline,f1,3,0.3817663817663818
 bank,classification,random_forest,baseline,f1,4,0.3773049645390071
-bank,classification,random_forest,baseline,roc_auc,0,0.7671693682485022
-bank,classification,random_forest,baseline,roc_auc,1,0.7726105889428747
-bank,classification,random_forest,baseline,roc_auc,2,0.7842166051464692
-bank,classification,random_forest,baseline,roc_auc,3,0.7735382334486062
-bank,classification,random_forest,baseline,roc_auc,4,0.7821525097777422
+bank,classification,random_forest,baseline,roc_auc,0,0.7671696630737299
+bank,classification,random_forest,baseline,roc_auc,1,0.7726103678239539
+bank,classification,random_forest,baseline,roc_auc,2,0.7842165314401623
+bank,classification,random_forest,baseline,roc_auc,3,0.7735382334486061
+bank,classification,random_forest,baseline,roc_auc,4,0.7821519200466123
 bank,classification,xgboost,baseline,accuracy,0,0.8979121145909201
 bank,classification,xgboost,baseline,accuracy,1,0.895241563486283
 bank,classification,xgboost,baseline,accuracy,2,0.9039815489196407

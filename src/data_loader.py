@@ -1,9 +1,14 @@
-"""Data loading and basic cleaning for both datasets.
+"""Data loading and basic cleaning for all 3 study datasets.
 
-Each loader returns (X, y). The train/test split happens in models.py
-so that loaders have a single responsibility.
+Each loader function returns (X, y):
+X = features DataFrame (raw, not yet encoded)
+y = target column
+
+Train/test splits happen later in models.py — these loaders only
+load and clean. One responsibility per file.
 """
 import pandas as pd
+import re
 from sklearn.model_selection import train_test_split
 
 from src.config import CHURN_FILE, HOUSING_FILE, BANK_FILE, RANDOM_SEED, TEST_SIZE
@@ -21,19 +26,19 @@ def load_churn(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
     """
     df = pd.read_csv(CHURN_FILE)
 
-    # Drop customer ID (not predictive)
+    # Customer ID is just an identifier — drop it before modeling
     df = df.drop(columns=["customerID"])
 
-    # 'TotalCharges' has blank strings for new customers — coerce to numeric
+    # New customers have blank "TotalCharges" — convert to number, blanks become 0
     df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
     df["TotalCharges"] = df["TotalCharges"].fillna(0)
 
-    # Encode target
+    # Convert "Yes" / "No" target into 1 / 0 - Encode
     y = (df["Churn"] == "Yes").astype(int)
     X = df.drop(columns=["Churn"])
 
     if verbose:
-        print(f"✅ Churn loaded: {X.shape[0]} rows × {X.shape[1]} features")
+        print(f"Churn loaded: {X.shape[0]} rows × {X.shape[1]} features")
         print(f"   Class balance: {y.mean():.1%} churned")
 
     return X, y
@@ -42,29 +47,26 @@ def load_churn(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
 # =====================================================================
 # Ames Housing (Regression)
 # =====================================================================
-import re
-import pandas as pd
-
-
 def load_housing(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
     """Load and lightly clean the Ames Housing dataset.
 
     Column names are sanitized (spaces → underscores) so they are
-    valid Python identifiers. Without this, LLM formulas using
-    backtick syntax like `Gr Liv Area` fail in our eval-based
-    feature engineer.
+    valid Python identifiers. Without this, LLM formulas like
+    `Gr Liv Area` would fail when our feature engineer tries to
+    evaluate them.
     """
     df = pd.read_csv(HOUSING_FILE)
 
-    # Drop ID columns if present
+    # Drop ID columns if any exist
     for col in ["Order", "PID", "Id"]:
         if col in df.columns:
             df = df.drop(columns=[col])
 
-    # 🔧 Sanitize column names so LLM formulas can reference them safely
+    # Helper: turn any column name into a safe Python identifier
+    # Example: "Gr Liv Area" → "Gr_Liv_Area", "1stFlrSF" → "_1stFlrSF"
     def clean(name: str) -> str:
-        name = re.sub(r"[^\w]", "_", name)  # non-word chars → _
-        name = re.sub(r"_+", "_", name)  # collapse multiple _
+        name = re.sub(r"[^\w]", "_", name)
+        name = re.sub(r"_+", "_", name)
         name = name.strip("_")
         if name and name[0].isdigit():
             name = "_" + name  # prepend _ if starts with digit
@@ -72,10 +74,11 @@ def load_housing(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
 
     df.columns = [clean(c) for c in df.columns]
 
+    # SalePrice is what we want to predict
     y = df["SalePrice"]
     X = df.drop(columns=["SalePrice"])
 
-    # Drop columns with >40% missing values
+    # If a column is more than 40% missing, drop it (too sparse to be useful)
     missing_pct = X.isnull().mean()
     high_missing = missing_pct[missing_pct > 0.4].index.tolist()
     if high_missing:
@@ -84,7 +87,7 @@ def load_housing(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
             print(f"    Dropped {len(high_missing)} cols with >40% missing")
 
     if verbose:
-        print(f"✅ Housing loaded: {X.shape[0]} rows × {X.shape[1]} features")
+        print(f"Housing loaded: {X.shape[0]} rows × {X.shape[1]} features")
         print(f"    Target range: ${y.min():,.0f} – ${y.max():,.0f}")
 
     return X, y
@@ -104,23 +107,24 @@ def load_bank(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
         X: features DataFrame
         y: binary target (1 = subscribed, 0 = did not)
     """
-    # The CSV uses ';' as separator
+
+    # This CSV uses semicolons as separators (not commas)
     df = pd.read_csv(BANK_FILE, sep=";")
 
-    # The 'duration' column is a known data leakage feature:
-    # it records the call duration AFTER the call happens — so it cannot
-    # realistically be used to predict the outcome ahead of time.
-    # The UCI documentation explicitly recommends dropping it for
-    # honest predictive modeling.
+    # ⚠️ Drop "duration" — it leaks the answer.
+    # Reason: this column is the call duration, which is only known AFTER the call.
+    # If duration = 0, the outcome is automatically "no" (no call happened).
+    # Including it would give artificially perfect predictions that don't generalize.
+    # The UCI documentation explicitly recommends dropping it.
     if "duration" in df.columns:
         df = df.drop(columns=["duration"])
 
-    # Encode target (column is 'y' with values 'yes'/'no')
+    # Encode - Convert "yes" / "no" target into 1 / 0
     y = (df["y"] == "yes").astype(int)
     X = df.drop(columns=["y"])
 
     if verbose:
-        print(f"✅ Bank loaded: {X.shape[0]} rows × {X.shape[1]} features")
+        print(f"Bank loaded: {X.shape[0]} rows × {X.shape[1]} features")
         print(f"   Class balance: {y.mean():.1%} subscribed")
 
     return X, y
@@ -130,7 +134,11 @@ def load_bank(verbose: bool = True) -> tuple[pd.DataFrame, pd.Series]:
 # Shared utility
 # =====================================================================
 def get_train_test_split(X, y, stratify: bool = True):
-    """Standard train/test split using project-wide settings."""
+    """Standard train/test split using project-wide settings.
+
+    Uses the same random seed and test size everywhere so results are
+    reproducible across notebooks.
+    """
     return train_test_split(
         X, y,
         test_size=TEST_SIZE,
