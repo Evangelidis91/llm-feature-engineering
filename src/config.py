@@ -20,20 +20,23 @@ HOUSING_FILE = DATA_RAW / "ames_housing.csv"
 BANK_FILE = DATA_RAW / "bank_marketing.csv"
 
 # ----- LLM Models (OpenRouter IDs) -----
-LLM_MODELS = {
+PRODUCTION_LLMS = {
     "gpt-4o-mini": "openai/gpt-4o-mini",
     "claude-sonnet": "anthropic/claude-sonnet-4.5",
     "gemini-flash": "google/gemini-2.0-flash-001",
     "deepseek-v3": "deepseek/deepseek-chat",
     "llama-3.3": "meta-llama/llama-3.3-70b-instruct",
     "qwen-2.5": "qwen/qwen-2.5-72b-instruct",
+}
 
-    # Frontier LLMs
+FRONTIER_LLMS = {
     "gpt-5.5": "openai/gpt-5.5",
     "claude-opus-4.6": "anthropic/claude-opus-4.6",
     "gemini-3.1-pro": "google/gemini-3.1-pro-preview",
     "deepseek-v4": "deepseek/deepseek-v4-pro",
 }
+
+LLM_MODELS = {**PRODUCTION_LLMS, **FRONTIER_LLMS}
 
 # ----- LLM Settings -----
 LLM_TEMPERATURE = 0.3  # Low for consistency
