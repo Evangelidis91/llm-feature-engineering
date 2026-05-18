@@ -3,12 +3,13 @@
 > An empirical study evaluating whether LLM-suggested features improve tabular ML models —
 > across **10 LLMs (2 generations)**, **3 datasets**, **2 prompt styles**, and **3 model families**.
 
-[![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
-[![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[](https://www.python.org/)
+[](https://scikit-learn.org/)
+[](https://opensource.org/licenses/MIT)
 
-| Attribute | Details |
-| :--- | :--- |
+> 📄 **Read the full research writeup:** [Hiring 10 LLMs as Feature Engineers](docs/findings.md)
+
+|
 | **ML models** | Logistic/Linear Regression, Random Forest, XGBoost |
 | **Evaluation** | 5-fold cross-validation, paired t-tests + Mann-Whitney U |
 
@@ -94,7 +95,7 @@ This suggests two distinct LLM capabilities:
 For Churn classification with **production-tier** features:
 
 | Model | Wins / Total |
-| :--- | :--- :|
+| :--- | :--- |
 | Logistic Regression | 9/12 (75%) |
 | **Random Forest** | **12/12 (100%)** ⭐ |
 | **XGBoost** | **12/12 (100%)** ⭐ |
@@ -107,14 +108,14 @@ While applying **420 LLM-generated formulas** to real data, I found four systema
 
 | Failure Mode | Example | LLMs Most Affected |
 | :--- | :--- | :--- |
-| 🔤 **Hallucinated columns** | `contract` instead of `Contract` | Llama, Qwen |
+| 🔤 **Hallucinated columns** | \`contract\` instead of \`Contract\` | Llama, Qwen |
 | ➗ **Numeric instability** | Division by zero → infinity | DeepSeek, GPT |
-| 🎭 **Type inconsistency** | Mixed `int` + `str` from incomplete `.replace()` mappings | Qwen |
-| 🎩 **Stylistic verbosity** (frontier!) | `df['col']` prefix instead of bare column references | GPT-5.5 |
+| 🎭 **Type inconsistency** | Mixed \`int\` + \`str\` from incomplete \`.replace()\` mappings | Qwen |
+| 🎩 **Stylistic verbosity** (frontier!) | \`df['col']\` prefix instead of bare column references | GPT-5.5 |
 
 The fourth mode emerged only with frontier models. GPT-5.5 initially scored 0% on Housing because it generates standalone pandas snippets instead of bare formula expressions — a stylistic preference, not a technical limitation. After our evaluator was patched to accept both styles, GPT-5.5 reached 100% validity — but its win rate remained at 72%, identical to several production models costing 100× less.
 
-### 8️⃣ Four-Stats Prompts Help Weaker Models
+### 8️⃣ With-Stats Prompts Help Weaker Models
 
 Adding column statistics to prompts had asymmetric effects:
 
@@ -146,9 +147,11 @@ Stronger models already use world knowledge effectively without extra context. S
 
 ## 📁 Project Structure
 
-```text
+\`\`\`
 llm-feature-engineering/
 ├── data/raw/                       # Datasets (not tracked)
+├── docs/
+│   └── findings.md                 # Full research writeup
 ├── notebooks/
 │   ├── 01_eda.ipynb                # Exploratory data analysis
 │   ├── 02_baseline.ipynb           # Baseline model training
@@ -172,82 +175,116 @@ llm-feature-engineering/
 │   ├── metrics.csv                 # Baseline results
 │   └── metrics_full.csv            # Baseline + LLM-augmented results
 └── requirements.txt
+\`\`\`
+
+---
 
 ## 🛠️ Reproducing the Project
 
 ### 1. Clone and set up
 
-```bash
-git clone https://github.com/YOUR_USERNAME/llm-feature-engineering.git
+\`\`\`bash
+git clone https://github.com/Evangelidis91/llm-feature-engineering.git
 cd llm-feature-engineering
 
 python3.12 -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
-```
+\`\`\`
 
 ### 2. Configure your API key
-```bash
+
+\`\`\`bash
 cp .env.example .env
 # Edit .env and add your OpenRouter API key
 # Get one at: https://openrouter.ai/settings/keys
-```
+\`\`\`
 
 ### 3. Download the datasets
 
-Place each CSV in data/raw/:
+Place each CSV in \`data/raw/\`:
 
-    *  Telco Customer Churn: kaggle.com/datasets/blastchar/telco-customer-churn → save as telco_churn.csv
-
-    *  Ames Housing: kaggle.com/datasets/prevek18/ames-housing-dataset → save as ames_housing.csv
-
-    *  Bank Marketing: archive.ics.uci.edu/dataset/222 → use bank-additional-full.csv, save as bank_marketing.csv
-  
+- **Telco Customer Churn**: [kaggle.com/datasets/blastchar/telco-customer-churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) → save as \`telco_churn.csv\`
+- **Ames Housing**: [kaggle.com/datasets/prevek18/ames-housing-dataset](https://www.kaggle.com/datasets/prevek18/ames-housing-dataset) → save as \`ames_housing.csv\`
+- **Bank Marketing**: [archive.ics.uci.edu/dataset/222](https://archive.ics.uci.edu/dataset/222/bank+marketing) → use \`bank-additional-full.csv\`, save as \`bank_marketing.csv\`
 
 ### 4. Run the notebooks in order
 
-jupyter notebook notebooks/01_eda.ipynb              # ~1 min
-jupyter notebook notebooks/02_baseline.ipynb         # ~3 min
-jupyter notebook notebooks/03_llm_features.ipynb     # ~10 min, ~$0.08
-jupyter notebook notebooks/04_results.ipynb          # ~15 min
+\`\`\`bash
+jupyter notebook notebooks/01_eda.ipynb                # ~1 min
+jupyter notebook notebooks/02_baseline.ipynb           # ~3 min
+jupyter notebook notebooks/03_llm_features.ipynb       # ~10 min, ~$0.08
+jupyter notebook notebooks/04_results.ipynb            # ~15 min
 jupyter notebook notebooks/05_frontier_features.ipynb  # ~12 min, ~$0.68
 jupyter notebook notebooks/06_frontier_results.ipynb   # ~10 min
+\`\`\`
 
+---
 
-### 🧰 Methodology Notes
-* Random seed = 42 throughout for reproducibility
-* Bank's duration column dropped — leakage per UCI guidance
-* Housing column names sanitized — Gr Liv Area → Gr_Liv_Area
-* Preprocessing fit only on training folds — no data leakage
-* Sandboxed eval() — restricted namespace, no filesystem/network access
-* Robust feature validation — rejects infinity, mixed-type, and constant outputs
-* Dual-style support — accepts both bare column references (col) and df['col'] style
-* All LLM responses saved to disk before parsing
-* Statistical tests: paired t-tests (within-LLM) + Mann-Whitney U (cross-tier)
+## 🧰 Methodology Notes
 
+- **Random seed = 42** throughout for reproducibility
+- **Bank's \`duration\` column dropped** — leakage per UCI guidance
+- **Housing column names sanitized** — \`Gr Liv Area\` → \`Gr_Liv_Area\`
+- **Preprocessing fit only on training folds** — no data leakage
+- **Sandboxed \`eval()\`** — restricted namespace, no filesystem/network access
+- **Robust feature validation** — rejects infinity, mixed-type, and constant outputs
+- **Dual-style support** — accepts both bare column references (\`col\`) and \`df['col']\` style
+- **All LLM responses saved to disk** before parsing
+- **Statistical tests:** paired t-tests (within-LLM) + Mann-Whitney U (cross-tier)
 
-### 🎓 What I Learned
+---
+
+## 🎓 What I Learned
+
 This was my first AI/ML research project. Key takeaways:
 
-    * Engineering matters as much as ML — the most impactful work was building the sandboxed evaluator with four layers of validation
-    * LLMs don't anticipate edge cases — production systems need robust validation
-    * Frontier ≠ better for narrow technical tasks — newer/pricier doesn't translate to better feature engineering
-    * Validity ≠ usefulness — a 100%-valid LLM can still produce features that don't improve model performance
-    * Honest negative results are valuable — "no significant difference" is more interesting than yet another "X improves Y" story
-    * Cost-aware engineering is a research metric — tracking $/valid feature exposed counterintuitive value rankings
+- **Engineering matters as much as ML** — the most impactful work was building the sandboxed evaluator with four layers of validation
+- **LLMs don't anticipate edge cases** — production systems need robust validation
+- **Frontier ≠ better for narrow technical tasks** — newer/pricier doesn't translate to better feature engineering
+- **Validity ≠ usefulness** — a 100%-valid LLM can still produce features that don't improve model performance
+- **Honest negative results are valuable** — "no significant difference" is more interesting than yet another "X improves Y" story
+- **Cost-aware engineering is a research metric** — tracking $/valid feature exposed counterintuitive value rankings
 
+---
 
-### 🚧 Limitations & Future Work
-* Only 3 datasets (more would strengthen generalization claims)
-* Each LLM called once per condition (no temperature variation)
-* Single value of n_features = 7 per call (sweep would be informative)
-* No iterative feedback loop (LLM never sees model errors and retries)
-* Only English-language prompts tested
-* "Frontier" tier is bound to a specific snapshot in time
+## 🚧 Limitations & Future Work
 
+- Only 3 datasets (more would strengthen generalization claims)
+- Each LLM called once per condition (no temperature variation)
+- Single value of \`n_features = 7\` per call (sweep would be informative)
+- No iterative feedback loop (LLM never sees model errors and retries)
+- Only English-language prompts tested
+- "Frontier" tier is bound to a specific snapshot in time (April 2026)
 
-### 🛠️ Tech Stack
-Core: Python 3.12 · pandas · NumPy · scikit-learn · XGBoost · scipy 
-LLMs: OpenRouter API (unified gateway for 10 models) Visualization: matplotlib · seaborn 
-Workflow: Git · Fork · Jupyter · PyCharm
+---
+
+## 🛠️ Tech Stack
+
+**Core:** Python 3.12 · pandas · NumPy · scikit-learn · XGBoost · scipy
+**LLMs:** OpenRouter API (unified gateway for 10 models)
+**Visualization:** matplotlib · seaborn
+**Workflow:** Git · GitHub PR-based branching · Jupyter · PyCharm
+
+---
+
+## 📜 License
+
+MIT — feel free to use, adapt, and build on this work.
+
+---
+
+## 🙏 Acknowledgments
+
+Datasets courtesy of:
+
+- IBM (Telco Customer Churn)
+- Dean De Cock (Ames Housing, *Journal of Statistics Education*, 2011)
+- S. Moro, P. Cortez, P. Rita (Bank Marketing, UCI ML Repository)
+
+LLM access via [OpenRouter](https://openrouter.ai).
+
+---
+
+*Built with ❤️ as a first AI/ML research project.*
